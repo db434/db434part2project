@@ -34,8 +34,20 @@ public class HalfEdgeScheme
 		edges.add(new Edge(v1,v2));
 	}
 	
-	public void addFace(Vector<Vertex> vertices)
+	public void addFace(Vector<Integer> indices)
 	{
+		Vector<Vertex> verts = new Vector<Vertex>();
+		
+		for(Integer i : indices) verts.add(vertices.get(i));
+		
 		faces.add(new Face(vertices));
+	}
+	
+	public String faceToString(Vector<Vertex> verts)
+	{
+		String s = String.valueOf(verts.size());
+		for(Vertex v : verts) s += " " + vertices.indexOf(v);
+		
+		return s;
 	}
 }
