@@ -1,5 +1,7 @@
 package part2Project;
 
+import java.util.Vector;
+
 public class MainClass
 {
 	private static ArgumentParser arg;
@@ -13,12 +15,12 @@ public class MainClass
 		
 		if(!arg.getInputFile().equals(""))
 		{
-			//try and catch filenotfound stuff? or do this in reader
-			hes = PLYReader.readFile(arg.getInputFile());
+			try {hes = PLYReader.readFile(arg.getInputFile());}
+			catch(Exception e) {fatalException(e);}
 		}
 		else
 		{
-			System.err.println("Error: no input file seleced.");
+			System.err.println("Error: no input file selected.");
 			System.exit(1);
 		}
 		
@@ -28,5 +30,16 @@ public class MainClass
 		{
 			PLYWriter.writeFile(arg.getOutputFile(), hes);
 		}
+	}
+	
+	public static String faceToString(Vector<Vertex> vertices)
+	{
+		return hes.faceToString(vertices);
+	}
+	
+	public static void fatalException(Exception e)
+	{
+		e.printStackTrace();
+		System.exit(1);
 	}
 }

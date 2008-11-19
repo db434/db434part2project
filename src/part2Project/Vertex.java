@@ -24,4 +24,9 @@ public class Vertex
 		this.y = y;
 		this.z = z;
 	}
+	
+	public String toString()
+	{
+		return new String(x + " " + y + " " + z);
+	}
 }

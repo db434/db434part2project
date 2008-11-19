@@ -10,4 +10,10 @@ public class Face
 	{
 		vertices = v;
 	}
+	
+	public String toString()
+	{
+		// Try to do this a better way
+		return MainClass.faceToString(vertices);
+	}
 }
