@@ -45,12 +45,12 @@ public class ArgumentParser
 			else if(s.startsWith("read="))
 			{
 				inFile = System.getProperty("user.dir") + "\\PLY Files\\" + s.substring(5);
-				if(MainClass.debug) System.out.println("Reading file: " + inFile);
+				//if(MainClass.debug) System.out.println("Reading file: " + inFile);
 			}
 			else if(s.startsWith("write="))
 			{
 				outFile = System.getProperty("user.dir") + "\\PLY Files\\" + s.substring(6);
-				if(MainClass.debug) System.out.println("Writing file: " + outFile);
+				//if(MainClass.debug) System.out.println("Writing file: " + outFile);
 			}
 			else if(s.equals("help"))
 			{

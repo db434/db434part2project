@@ -14,6 +14,6 @@ public class Face
 	public String toString()
 	{
 		// Try to do this a better way
-		return MainClass.faceToString(vertices);
+		return MainClass.faceToString(vertices);		
 	}
 }

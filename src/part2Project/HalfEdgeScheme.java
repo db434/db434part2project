@@ -15,6 +15,14 @@ public class HalfEdgeScheme
 		faces = new Vector<Face>();
 	}
 	
+	public int numVertices() {return vertices.size();}
+	public int numEdges()	 {return edges.size();}
+	public int numFaces()	 {return faces.size();}
+	
+	public Vertex getVertex(int index) {return vertices.get(index);}
+	public Edge getEdge(int index)	   {return edges.get(index);}
+	public Face getFace(int index)	   {return faces.get(index);}
+	
 	private void refine() {}
 	private void smooth() {}
 	
@@ -40,7 +48,7 @@ public class HalfEdgeScheme
 		
 		for(Integer i : indices) verts.add(vertices.get(i));
 		
-		faces.add(new Face(vertices));
+		faces.add(new Face(verts));
 	}
 	
 	public String faceToString(Vector<Vertex> verts)

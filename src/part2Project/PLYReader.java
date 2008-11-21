@@ -4,12 +4,11 @@ import java.io.*;
 import java.util.Vector;
 
 public class PLYReader
-{
-	static BufferedReader in;
-	
+{	
 	public static HalfEdgeScheme readFile(String fileName) throws Exception
 	{
 		HalfEdgeScheme hes = new HalfEdgeScheme();
+		BufferedReader in;
 		
 		in = new BufferedReader(new FileReader(fileName));
 		
