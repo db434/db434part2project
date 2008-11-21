@@ -7,7 +7,7 @@ public class MainClass
 	private static ArgumentParser arg;
 	private static HalfEdgeScheme hes;
 	
-	public static final boolean debug = true;
+	public static final boolean debug = false;
 	
 	public static void main(String[] args)
 	{
@@ -15,8 +15,16 @@ public class MainClass
 		
 		if(!arg.getInputFile().equals(""))
 		{
+			System.out.printf("Attempting to read file " + arg.getInputFile() + "... ");
+			
 			try {hes = PLYReader.readFile(arg.getInputFile());}
-			catch(Exception e) {fatalException(e);}
+			catch(Exception e)
+			{
+				System.out.println("Failed.");
+				fatalException(e);
+			}
+			
+			System.out.println("Complete.");
 		}
 		else
 		{
@@ -28,7 +36,16 @@ public class MainClass
 		
 		if(!arg.getOutputFile().equals(""))
 		{
-			PLYWriter.writeFile(arg.getOutputFile(), hes);
+			System.out.printf("Attempting to write file " + arg.getOutputFile() + "... ");
+			
+			try {PLYWriter.writeFile(arg.getOutputFile(), hes);}
+			catch(Exception e)
+			{
+				System.out.println("Failed.");
+				fatalException(e);
+			}
+			
+			System.out.println("Complete.");
 		}
 	}
 	
