@@ -38,7 +38,7 @@ public class MainClass
 		{
 			System.out.printf("Attempting to write file " + arg.getOutputFile() + "... ");
 			
-			try {PLYWriter.writeFile(arg.getOutputFile(), hes);}
+			try {PLYWriter.writeFile(arg, hes);}
 			catch(Exception e)
 			{
 				System.out.println("Failed.");
