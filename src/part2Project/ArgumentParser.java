@@ -2,7 +2,7 @@ package part2Project;
 
 public class ArgumentParser
 {
-	private int numSteps = -1;		//Default starting values or exceptions?
+	private int numSteps = 0;		//Default starting values or exceptions?
 	private int degree = 3;
 	private double runTime = -1;
 	private boolean printStats = false;
@@ -57,7 +57,11 @@ public class ArgumentParser
 				System.out.printf(helpText());
 				System.exit(0);
 			}
-			else System.err.println("Unrecognised argument: " + s);
+			else
+			{
+				System.err.println("Unrecognised argument: " + s);
+				System.out.println(helpText());
+			}
 		}
 	}
 	
