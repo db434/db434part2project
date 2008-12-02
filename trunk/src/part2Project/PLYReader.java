@@ -59,6 +59,8 @@ public class PLYReader
 			hes.addFace(indices);
 		}
 		
+		hes.tidy();
+		
 		in.close();
 		
 		return hes;

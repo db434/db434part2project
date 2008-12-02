@@ -32,7 +32,25 @@ public class MainClass
 			System.exit(1);
 		}
 		
+		int stepsSoFar = 0;
+		double startTime = System.currentTimeMillis();
+		double endTime = startTime + arg.getRunTime()*1000;
+		
 		//Do subdivision
+		while(stepsSoFar<arg.getNumSteps() && System.currentTimeMillis()<endTime)
+		{
+			hes.subdivide(arg.getDegree());			
+			stepsSoFar++;
+			
+			if(arg.printStats())
+			{
+				double timeTaken = System.currentTimeMillis() - startTime;
+				startTime = System.currentTimeMillis();	// Update for next cycle
+				
+				System.out.println("Step " + stepsSoFar + ": " + timeTaken + "\n" +
+									hes.stats());
+			}			
+		}
 		
 		if(!arg.getOutputFile().equals(""))
 		{
