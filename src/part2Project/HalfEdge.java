@@ -19,4 +19,9 @@ public class HalfEdge
 	
 	public void setSym(HalfEdge h)  {sym = h;}
 	public void setNext(HalfEdge h) {next = h;}
+	
+	public Vertex midpoint()
+	{
+		return Vertex.average(vertex, sym.vertex);
+	}
 }

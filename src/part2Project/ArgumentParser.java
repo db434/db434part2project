@@ -4,7 +4,7 @@ public class ArgumentParser
 {
 	private int numSteps = 0;		//Default starting values or exceptions?
 	private int degree = 3;
-	private double runTime = -1;
+	private double runTime = Double.MAX_VALUE;
 	private boolean printStats = false;
 	private Scheme scheme = Scheme.WINGEDEDGE;
 	private String inFile = "", outFile = "";

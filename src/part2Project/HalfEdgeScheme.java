@@ -61,13 +61,14 @@ public class HalfEdgeScheme
 		vertices.add(new Vertex(x,y,z));
 	}
 	
-	public void addHalfEdge(Vertex v1, Vertex v2)
+	public HalfEdge addHalfEdge(Vertex v1, Vertex v2)
 	{
 		HalfEdge h = new HalfEdge(v2);
 		edges.add(h);
 		
 		Pair p = new Pair(v2,v1);
 		
+		// Match this half-edge up with the symmetric one, if it exists
 		if(edgeMap.containsKey(p))
 		{
 			HalfEdge h2 = edgeMap.remove(p);
@@ -78,22 +79,47 @@ public class HalfEdgeScheme
 		{
 			edgeMap.put(new Pair(v1,v2), h);
 		}
+		
+		return h;
 	}
 	
 	public void addFace(Vector<Integer> indices)
 	{
-		Vector<Vertex> verts = new Vector<Vertex>();		
+		Vector<Vertex> verts = new Vector<Vertex>();
+		Vector<HalfEdge> halfedges = new Vector<HalfEdge>();
 		for(Integer i : indices) verts.add(vertices.get(i));
 		
 		faces.add(new Face(verts));
 		
+		// Create half-edges for each pair of adjacent vertices
 		for(int i=1; i<verts.size(); i++)
 		{
-			addHalfEdge(verts.get(i-1), verts.get(i));
+			halfedges.add(addHalfEdge(verts.get(i-1), verts.get(i)));
 		}
-		addHalfEdge(verts.lastElement(), verts.firstElement());
+		halfedges.add(addHalfEdge(verts.lastElement(), verts.firstElement()));
 		
-		// "sym" done, now need to initialise "next"
+		// Go through the half-edges, linking them to the "next" half-edges
+		for(int i=1; i<halfedges.size(); i++)
+		{
+			halfedges.get(i-1).setNext(halfedges.get(i));
+		}
+		halfedges.lastElement().setNext(halfedges.firstElement());
+	}
+	
+	// Look for inconsistencies/boundaries and deal with them
+	public void tidy() throws Exception
+	{
+		// For now, just report an error. Could perhaps create dummy faces later.
+		if(!edgeMap.isEmpty()) throw new Exception("Boundary detected in mesh.");
+	}
+	
+	public String stats()
+	{
+		return new String("" +
+				"Vertices:\t" + numVertices() + "\n" +
+				"Faces:\t" + numFaces() + "\n");
+		
+		// Volume too?
 	}
 	
 	public String faceToString(Vector<Vertex> verts)
