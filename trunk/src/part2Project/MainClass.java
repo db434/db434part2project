@@ -47,7 +47,7 @@ public class MainClass
 				double timeTaken = System.currentTimeMillis() - startTime;
 				startTime = System.currentTimeMillis();	// Update for next cycle
 				
-				System.out.println("Step " + stepsSoFar + ": " + timeTaken + "\n" +
+				System.out.println("Step " + stepsSoFar + ":\t\t" + timeTaken + "ms\n" +
 									hes.stats());
 			}			
 		}
