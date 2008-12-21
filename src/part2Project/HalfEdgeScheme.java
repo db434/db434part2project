@@ -47,23 +47,47 @@ public class HalfEdgeScheme
 	public HalfEdge getHalfEdge(int index)  {return edges.get(index);}
 	public Face getFace(int index)	   		{return faces.get(index);}
 	
-	private void refine() {}
-	private void smooth() {}
-	
 	public void subdivide(int degree)
 	{
 		refine();
 		for(int i=1; i<degree; i++) smooth();
+		
+		reset();
 	}
+	
+	// Method to introduce more vertices to the mesh
+	private void refine()
+	{
+		int numEdges = numEdges();	// Store the starting value, as more will be added
+		for(int i=0; i<numEdges; i++)
+		{
+			HalfEdge e = edges.get(i);
+			if(e.hasBeenSplit) continue;
+			else e.face().split(e, this);
+		}
+	}
+	
+	// Method to adjust positions of vertices
+	private void smooth() {}
+	
+	// Method to remove any temporary statuses, to prepare for the next subdivision step
+	private void reset()
+	{
+		for(HalfEdge h : edges) h.hasBeenSplit = false;
+	}
+	
+	public void addVertex(Vertex v)		{vertices.add(v);}
+	public void addHalfEdge(HalfEdge e) {edges.add(e);}
+	public void addFace(Face f)			{faces.add(f);}
 	
 	public void addVertex(double x, double y, double z)
 	{
 		vertices.add(new Vertex(x,y,z));
 	}
 	
-	public HalfEdge addHalfEdge(Vertex v1, Vertex v2)
+	public HalfEdge addHalfEdge(Vertex v1, Vertex v2, Face f)
 	{
-		HalfEdge h = new HalfEdge(v2);
+		HalfEdge h = new HalfEdge(v2, f);
 		edges.add(h);
 		
 		Pair p = new Pair(v2,v1);
@@ -89,14 +113,15 @@ public class HalfEdgeScheme
 		Vector<HalfEdge> halfedges = new Vector<HalfEdge>();
 		for(Integer i : indices) verts.add(vertices.get(i));
 		
-		faces.add(new Face(verts));
+		Face f = new Face(verts);
+		faces.add(f);
 		
 		// Create half-edges for each pair of adjacent vertices
 		for(int i=1; i<verts.size(); i++)
 		{
-			halfedges.add(addHalfEdge(verts.get(i-1), verts.get(i)));
+			halfedges.add(addHalfEdge(verts.get(i-1), verts.get(i), f));
 		}
-		halfedges.add(addHalfEdge(verts.lastElement(), verts.firstElement()));
+		halfedges.add(addHalfEdge(verts.lastElement(), verts.firstElement(), f));
 		
 		// Go through the half-edges, linking them to the "next" half-edges
 		for(int i=1; i<halfedges.size(); i++)
@@ -117,7 +142,7 @@ public class HalfEdgeScheme
 	{
 		return new String("" +
 				"Vertices:\t" + numVertices() + "\n" +
-				"Faces:\t" + numFaces() + "\n");
+				"Faces:\t\t" + numFaces() + "\n");
 		
 		// Volume too?
 	}
