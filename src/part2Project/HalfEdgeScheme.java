@@ -68,7 +68,12 @@ public class HalfEdgeScheme
 	}
 	
 	// Method to adjust positions of vertices
-	private void smooth() {}
+	private void smooth()
+	{
+		// for all halfedges' vertices, make contributions
+		
+		for(Vertex v : vertices) v.smooth();
+	}
 	
 	// Method to remove any temporary statuses, to prepare for the next subdivision step
 	private void reset()

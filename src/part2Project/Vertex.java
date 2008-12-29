@@ -3,6 +3,8 @@ package part2Project;
 public class Vertex
 {
 	private double x,y,z;
+	private double nextx, nexty, nextz;
+	private float totalWeight = 0;
 	
 	public Vertex(double x, double y, double z)
 	{
@@ -23,6 +25,23 @@ public class Vertex
 		this.x = x;
 		this.y = y;
 		this.z = z;
+	}
+	
+	public void addContribution(Vertex v, float weight)
+	{
+		float norm = totalWeight + weight;
+		nextx = nextx * (totalWeight/norm) + v.x * (weight/norm);
+		nexty = nexty * (totalWeight/norm) + v.y * (weight/norm);
+		nextz = nextz * (totalWeight/norm) + v.z * (weight/norm);
+		totalWeight = norm;
+	}
+	
+	public void smooth()
+	{
+		x = nextx;
+		y = nexty;
+		z = nextz;
+		totalWeight = 0;
 	}
 	
 	public static Vertex average(Vertex v1, Vertex v2)
