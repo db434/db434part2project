@@ -6,6 +6,9 @@ public class Vertex
 	private double nextx, nexty, nextz;
 	private float totalWeight = 0;
 	
+	public boolean isOld = false;	// When smoothing, only old vertices make contributions
+	public boolean contributed = false;
+	
 	public Vertex(double x, double y, double z)
 	{
 		this.x = x;
@@ -27,6 +30,22 @@ public class Vertex
 		this.z = z;
 	}
 	
+	public void contribute(HalfEdge e, float self, float neighbour, float diagonal)
+	{
+		this.addContribution(this, self);
+		
+		HalfEdge he = e;
+		do
+		{
+			he.sym().vertex().addContribution(this, neighbour);
+			he.sym().next().vertex().addContribution(this, diagonal);
+		}
+		while(!(he = he.next()).equals(e));
+		
+		contributed = true;
+	}
+	
+	// Add a contribution from vertex v
 	public void addContribution(Vertex v, float weight)
 	{
 		float norm = totalWeight + weight;
@@ -42,6 +61,7 @@ public class Vertex
 		y = nexty;
 		z = nextz;
 		totalWeight = 0;
+		contributed = false;
 	}
 	
 	public static Vertex average(Vertex v1, Vertex v2)
