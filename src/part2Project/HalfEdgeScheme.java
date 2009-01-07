@@ -50,7 +50,7 @@ public class HalfEdgeScheme
 	public void subdivide(int degree)
 	{
 		refine();
-		for(int i=1; i<degree; i++) smooth();
+		for(int step=1; step<=(degree/2); step++) smooth(degree, step);
 		
 		reset();
 	}
@@ -68,9 +68,23 @@ public class HalfEdgeScheme
 	}
 	
 	// Method to adjust positions of vertices
-	private void smooth()
+	private void smooth(int degree, int step)
 	{
+		valencyToWeight.clear();
+		
 		// for all halfedges' vertices, make contributions
+		for(HalfEdge e : edges)
+		{
+			Vertex v = e.vertex();
+			if(v.isOld && !v.contributed)
+			{
+				float weight = getWeight(e, degree, step);
+				float self = weight*weight;
+				float neighbour = weight*(1-weight)/2;			//
+				float diagonal = (1-weight)*(1-weight)/4;		//
+				v.contribute(e, self, neighbour, diagonal);
+			}			
+		}
 		
 		for(Vertex v : vertices) v.smooth();
 	}
@@ -79,6 +93,50 @@ public class HalfEdgeScheme
 	private void reset()
 	{
 		for(HalfEdge h : edges) h.hasBeenSplit = false;
+		for(Vertex v : vertices) v.isOld = true;
+	}
+	
+	// Store weights so they don't have to be recomputed
+	private HashMap<Integer, Float> valencyToWeight = new HashMap<Integer, Float>();
+	
+	// TODO: Perhaps extend to return all three weights (self, neighbour, diagonal)?
+	// Returns the primary weight for the edge's vertex to use
+	private float getWeight(HalfEdge e, int degree, int step)
+	{
+		int valency = 1;
+		HalfEdge he = e;
+		
+		while(!(he = he.next().sym()).equals(e))
+		{
+			valency++;
+		}
+		
+		float weight = 0;
+		float d = degree;
+		float s = step;
+		if(valencyToWeight.containsKey(valency))	// Already computed
+		{
+			weight = valencyToWeight.get(valency);
+		}
+		else										// Need to compute
+		{
+			//if(valency == 4)	// Main case
+			{
+				if(degree%2 == 0)	// Even degree
+				{
+					weight = (d+1)/(2*(d-s+1));
+				}
+				else
+				{
+					weight = s/(d-s);
+				}
+			}
+			//else System.out.println("Valency = "+valency);
+			
+			valencyToWeight.put(valency, weight);
+		}
+		
+		return weight;
 	}
 	
 	public void addVertex(Vertex v)		{vertices.add(v);}
@@ -87,7 +145,9 @@ public class HalfEdgeScheme
 	
 	public void addVertex(double x, double y, double z)
 	{
-		vertices.add(new Vertex(x,y,z));
+		Vertex v = new Vertex(x,y,z);
+		v.isOld = true;
+		vertices.add(v);
 	}
 	
 	public HalfEdge addHalfEdge(Vertex v1, Vertex v2, Face f)
@@ -147,6 +207,7 @@ public class HalfEdgeScheme
 	{
 		return new String("" +
 				"Vertices:\t" + numVertices() + "\n" +
+				"HalfEdges:\t" + numEdges() + "\n" +
 				"Faces:\t\t" + numFaces() + "\n");
 		
 		// Volume too?
