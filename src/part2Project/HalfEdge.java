@@ -57,6 +57,7 @@ public class HalfEdge
 			e.sym = sym;
 			
 			Vertex midpoint = Vertex.average(vertex, sym.vertex);
+			midpoint.isOld = true;	// Vertices on existing edges count as old?
 			hes.addVertex(midpoint);
 			
 			vertex = midpoint;

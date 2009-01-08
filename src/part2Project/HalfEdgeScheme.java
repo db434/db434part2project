@@ -76,7 +76,7 @@ public class HalfEdgeScheme
 		for(HalfEdge e : edges)
 		{
 			Vertex v = e.vertex();
-			if(v.isOld && !v.contributed)
+			if(!v.contributed)
 			{
 				float weight = getWeight(e, degree, step);
 				float self = weight*weight;
@@ -86,7 +86,9 @@ public class HalfEdgeScheme
 			}			
 		}
 		
-		for(Vertex v : vertices) v.smooth();
+		// Want new points to move on even steps, and old ones to move on odd steps
+		boolean wantOld = (step%2 == 1);
+		for(Vertex v : vertices) v.smooth(wantOld);
 	}
 	
 	// Method to remove any temporary statuses, to prepare for the next subdivision step
@@ -111,15 +113,17 @@ public class HalfEdgeScheme
 			valency++;
 		}
 		
-		float weight = 0;
-		float d = degree;
-		float s = step;
+		float weight;
+		
 		if(valencyToWeight.containsKey(valency))	// Already computed
 		{
 			weight = valencyToWeight.get(valency);
 		}
 		else										// Need to compute
 		{
+			float d = degree;
+			float s = step;
+			
 			//if(valency == 4)	// Main case
 			{
 				if(degree%2 == 0)	// Even degree
@@ -131,7 +135,7 @@ public class HalfEdgeScheme
 					weight = s/(d-s);
 				}
 			}
-			//else System.out.println("Valency = "+valency);
+			//weight *= 4/valency;
 			
 			valencyToWeight.put(valency, weight);
 		}
