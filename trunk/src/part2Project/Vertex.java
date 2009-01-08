@@ -40,7 +40,7 @@ public class Vertex
 			he.sym().vertex().addContribution(this, neighbour);
 			he.sym().next().vertex().addContribution(this, diagonal);
 		}
-		while(!(he = he.next()).equals(e));
+		while(!(he = he.next().sym()).equals(e));
 		
 		contributed = true;
 	}
@@ -55,12 +55,17 @@ public class Vertex
 		totalWeight = norm;
 	}
 	
-	public void smooth()
+	// Moves the vertex if it is meant to move this step, and clears temporary 
+	// values, ready for the next step.
+	public void smooth(boolean wantOld)
 	{
-		x = nextx;
-		y = nexty;
-		z = nextz;
-		totalWeight = 0;
+		if((wantOld && isOld) || (!wantOld && !isOld))	// Could use xor, but less clear
+		{
+			x = nextx;
+			y = nexty;
+			z = nextz;
+		}
+		nextx = 0; nexty = 0; nextz = 0; totalWeight = 0;
 		contributed = false;
 	}
 	
