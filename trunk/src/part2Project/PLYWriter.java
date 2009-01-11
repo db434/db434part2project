@@ -6,6 +6,7 @@ public class PLYWriter
 {
 	public static void writeFile(ArgumentParser arg, HalfEdgeScheme hes) throws Exception
 	{
+		//hes.sortVertices();
 		int vertices = hes.numVertices();
 		int faces = hes.numFaces();
 		

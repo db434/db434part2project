@@ -4,13 +4,13 @@ import java.util.*;
 
 public class HalfEdgeScheme
 {
-	private Vector<Vertex> vertices;
+	private List<Vertex> vertices;
 	private Vector<HalfEdge> edges;
 	private Vector<Face> faces;
 	
 	public HalfEdgeScheme()
 	{
-		vertices = new Vector<Vertex>();
+		vertices = new ArrayList<Vertex>();
 		edges = new Vector<HalfEdge>();
 		faces = new Vector<Face>();
 	}
@@ -128,7 +128,7 @@ public class HalfEdgeScheme
 			{
 				if(degree%2 == 0)	// Even degree
 				{
-					weight = (d+1)/(2*(d-s+1));
+					weight = (s+1)/(2*(d-s+1));
 				}
 				else
 				{
@@ -207,6 +207,11 @@ public class HalfEdgeScheme
 		if(!edgeMap.isEmpty()) throw new Exception("Boundary detected in mesh.");
 	}
 	
+	public void sortVertices()
+	{
+		Collections.sort(vertices);
+	}
+	
 	public String stats()
 	{
 		return new String("" +
@@ -221,6 +226,7 @@ public class HalfEdgeScheme
 	{
 		String s = String.valueOf(verts.size());
 		for(Vertex v : verts) s += " " + vertices.indexOf(v);
+										//Collections.binarySearch(vertices, v);
 		
 		return s;
 	}
