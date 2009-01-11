@@ -1,6 +1,6 @@
 package part2Project;
 
-public class Vertex
+public class Vertex implements Comparable<Vertex>
 {
 	private double x,y,z;
 	private double nextx, nexty, nextz;
@@ -74,6 +74,12 @@ public class Vertex
 		return new Vertex((v1.x + v2.x)/2,
 						  (v1.y + v2.y)/2,
 						  (v1.z + v2.z)/2);
+	}
+	
+	public int compareTo(Vertex v)
+	{
+		// Doesn't seem to work perfectly
+		return v.hashCode() - this.hashCode();
 	}
 	
 	public String toString()
