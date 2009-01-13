@@ -1,7 +1,5 @@
 package part2Project;
 
-import java.util.Vector;
-
 public class MainClass
 {
 	private static ArgumentParser arg;
@@ -65,11 +63,6 @@ public class MainClass
 			
 			System.out.println("Complete.");
 		}
-	}
-	
-	public static String faceToString(Vector<Vertex> vertices)
-	{
-		return hes.faceToString(vertices);
 	}
 	
 	public static void fatalException(Exception e)
