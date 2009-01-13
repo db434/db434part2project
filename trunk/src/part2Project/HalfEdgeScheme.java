@@ -4,13 +4,13 @@ import java.util.*;
 
 public class HalfEdgeScheme
 {
-	private List<Vertex> vertices;
+	private Vector<Vertex> vertices;
 	private Vector<HalfEdge> edges;
 	private Vector<Face> faces;
 	
 	public HalfEdgeScheme()
 	{
-		vertices = new ArrayList<Vertex>();
+		vertices = new Vector<Vertex>();
 		edges = new Vector<HalfEdge>();
 		faces = new Vector<Face>();
 	}
@@ -207,11 +207,6 @@ public class HalfEdgeScheme
 		if(!edgeMap.isEmpty()) throw new Exception("Boundary detected in mesh.");
 	}
 	
-	public void sortVertices()
-	{
-		Collections.sort(vertices);
-	}
-	
 	public String stats()
 	{
 		return new String("" +
@@ -220,14 +215,5 @@ public class HalfEdgeScheme
 				"Faces:\t\t" + numFaces() + "\n");
 		
 		// Volume too?
-	}
-	
-	public String faceToString(Vector<Vertex> verts)
-	{
-		String s = String.valueOf(verts.size());
-		for(Vertex v : verts) s += " " + vertices.indexOf(v);
-										//Collections.binarySearch(vertices, v);
-		
-		return s;
 	}
 }

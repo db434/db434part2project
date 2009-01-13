@@ -80,9 +80,19 @@ public class Face
 		h1.setNext(h2); h2.setNext(h3); h3.setNext(h4); h4.setNext(h1);
 	}
 	
+	private boolean shouldDivide()
+	{
+		// Could check to see how small the polygon is
+		
+		// Could check how flat the polygon is
+		return true;
+	}
+	
 	public String toString()
 	{
-		// Try to do this a better way
-		return MainClass.faceToString(vertices);		
+		String s = String.valueOf(vertices.size());
+		for(Vertex v : vertices) s += " " + v.getIndex();
+		
+		return s;
 	}
 }

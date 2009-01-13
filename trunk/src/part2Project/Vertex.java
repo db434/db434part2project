@@ -1,10 +1,13 @@
 package part2Project;
 
-public class Vertex implements Comparable<Vertex>
+public class Vertex
 {
 	private double x,y,z;
 	private double nextx, nexty, nextz;
 	private float totalWeight = 0;
+	
+	static int numVertices = 0;
+	private int index;
 	
 	public boolean isOld = false;	// When smoothing, only old vertices make contributions
 	public boolean contributed = false;
@@ -14,13 +17,8 @@ public class Vertex implements Comparable<Vertex>
 		this.x = x;
 		this.y = y;
 		this.z = z;
-	}
-	
-	public Vertex(Vertex v)
-	{
-		this.x = v.x;
-		this.y = v.y;
-		this.z = v.z;
+		
+		index = numVertices++;
 	}
 	
 	public void move(double x, double y, double z)
@@ -76,10 +74,11 @@ public class Vertex implements Comparable<Vertex>
 						  (v1.z + v2.z)/2);
 	}
 	
-	public int compareTo(Vertex v)
+	// Returns the vertex's position in the vertex vector
+	public int getIndex()
 	{
-		// Doesn't seem to work perfectly
-		return v.hashCode() - this.hashCode();
+		// All vertices store their own index to allow quick look-up
+		return index;
 	}
 	
 	public String toString()
