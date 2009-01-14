@@ -74,6 +74,15 @@ public class Vertex
 						  (v1.z + v2.z)/2);
 	}
 	
+	public static double distBetween(Vertex v1, Vertex v2)
+	{
+		double dx = v1.x - v2.x;
+		double dy = v1.y - v2.y;
+		double dz = v1.z - v2.z;
+		
+		return Math.sqrt(dx*dx + dy*dy + dz*dz);
+	}
+	
 	// Returns the vertex's position in the vertex vector
 	public int getIndex()
 	{

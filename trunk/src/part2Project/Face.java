@@ -6,6 +6,12 @@ public class Face
 {
 	private Vector<Vertex> vertices;
 	
+	private enum DivideBy {SIZE, CURVATURE, BOTH};
+	private static DivideBy divReason = DivideBy.SIZE;
+	private static double minDistance = 0.001;	// Update after testing
+	private static double minCurvature = 0;		// Update after testing
+	
+	
 	public Face()
 	{
 		vertices = new Vector<Vertex>();
@@ -23,7 +29,7 @@ public class Face
 		{
 			MainClass.fatalException(new Exception("Face split from invalid edge."));
 		}
-		else
+		else if(shouldDivide())
 		{
 			Face NW = this, SW = new Face(), SE = new Face(), NE = new Face();
 			
@@ -82,10 +88,25 @@ public class Face
 	
 	private boolean shouldDivide()
 	{
-		// Could check to see how small the polygon is
+		boolean divide = true;
 		
-		// Could check how flat the polygon is
-		return true;
+		if(MainClass.adaptive)
+		{
+			// Could check to see how small the polygon is
+			if((divReason == DivideBy.SIZE) || (divReason == DivideBy.BOTH))
+			{
+				// See how large the two diagonals are
+				divide = (Vertex.distBetween(vertices.get(0), vertices.get(2)) > minDistance
+					   || Vertex.distBetween(vertices.get(1), vertices.get(3)) > minDistance);
+			}
+			// Could check how flat the polygon is
+			if((divReason == DivideBy.CURVATURE) || (divReason == DivideBy.BOTH))
+			{
+				
+			}
+		}
+		
+		return divide;
 	}
 	
 	public String toString()
