@@ -5,6 +5,8 @@ import java.util.Vector;
 public class Face
 {
 	private Vector<Vertex> vertices;
+	private int divLevel = 0;					// Some faces may be divided different
+												// amounts to their neighbours
 	
 	private enum DivideBy {SIZE, CURVATURE, BOTH};
 	private static DivideBy divReason = DivideBy.SIZE;
@@ -99,6 +101,7 @@ public class Face
 				divide = (Vertex.distBetween(vertices.get(0), vertices.get(2)) > minDistance
 					   || Vertex.distBetween(vertices.get(1), vertices.get(3)) > minDistance);
 			}
+			
 			// Could check how flat the polygon is
 			if((divReason == DivideBy.CURVATURE) || (divReason == DivideBy.BOTH))
 			{
@@ -113,6 +116,139 @@ public class Face
 	{
 		String s = String.valueOf(vertices.size());
 		for(Vertex v : vertices) s += " " + v.getIndex();
+		
+		return s;
+	}
+	
+	public String toString(HalfEdge e)
+	{
+		String s = "";
+		HalfEdge he = e;
+		
+		while(!(he.vertex()).equals(vertices.firstElement()))
+		{
+			he = he.next();		// Rotate to line up with vertices in vector
+		}
+		
+		int v1 = vertices.get(0).getIndex();
+		int v2 = vertices.get(1).getIndex();
+		int v3 = vertices.get(2).getIndex();
+		int v4 = vertices.get(3).getIndex();		
+		
+		// Find which neighbouring sides have been divided more than this one
+		boolean side1, side2, side3, side4;
+		
+		side1 = divLevel < he.sym().face().divLevel;	he = he.next();
+		side2 = divLevel < he.sym().face().divLevel;	he = he.next();
+		side3 = divLevel < he.sym().face().divLevel;	he = he.next();
+		side4 = divLevel < he.sym().face().divLevel;
+		
+		if(side1)
+		{
+			if(side2)
+			{
+				if(side3)
+				{
+					if(side4)	// 1,2,3,4
+					{
+						
+					}
+					else		// 1,2,3
+					{
+						
+					}
+				}
+				else
+				{
+					if(side4)	// 1,2,4
+					{
+						
+					}
+					else		// 1,2
+					{
+						
+					}
+				}
+			}
+			else
+			{
+				if(side3)
+				{
+					if(side4)	// 1,3,4
+					{
+						
+					}
+					else		// 1,3
+					{
+						
+					}
+				}
+				else
+				{
+					if(side4)	// 1,4
+					{
+						
+					}
+					else		// 1
+					{
+						
+					}
+				}
+			}
+		}
+		else
+		{
+			if(side2)
+			{
+				if(side3)
+				{
+					if(side4)	// 2,3,4
+					{
+						
+					}
+					else		// 2,3
+					{
+						
+					}
+				}
+				else
+				{
+					if(side4)	// 2,4
+					{
+						
+					}
+					else		// 2
+					{
+						
+					}
+				}
+			}
+			else
+			{
+				if(side3)
+				{
+					if(side4)	// 3,4
+					{
+						
+					}
+					else		// 3
+					{
+						
+					}
+				}
+				else
+				{
+					if(side4)	// 4
+					{
+						
+					}
+					else		// All sides the same as this one
+					{
+						s = "4 "+v1+" "+v2+" "+v3+" "+v4;
+					}
+				}
+			}
+		}
 		
 		return s;
 	}
