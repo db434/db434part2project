@@ -6,6 +6,7 @@ public class ArgumentParser
 	private int degree = 3;
 	private double runTime = Double.MAX_VALUE;
 	private boolean printStats = false;
+	private boolean adaptive = false;
 	private Scheme scheme = Scheme.WINGEDEDGE;
 	private String inFile = "", outFile = "";
 	
@@ -34,6 +35,11 @@ public class ArgumentParser
 			{
 				printStats = true;
 				if(MainClass.debug) System.out.println("Stats will be printed");
+			}
+			else if(s.equals("stats"))
+			{
+				adaptive = true;
+				if(MainClass.debug) System.out.println("Using adaptive algorithm");
 			}
 			else if(s.startsWith("scheme="))
 			{
@@ -69,6 +75,7 @@ public class ArgumentParser
 	public int getDegree()			{return degree;}
 	public double getRunTime()		{return runTime;}
 	public boolean printStats()		{return printStats;}
+	public boolean isAdaptive()		{return adaptive;}
 	public Scheme getScheme()		{return scheme;}
 	public String getInputFile() 	{return inFile;}
 	public String getOutputFile()	{return outFile;}
