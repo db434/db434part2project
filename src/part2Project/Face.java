@@ -120,6 +120,8 @@ public class Face
 		return s;
 	}
 	
+	// Split a quadrilateral when outputting it, so that there are no gaps between
+	// it and adjacent faces
 	public String toString(HalfEdge e)
 	{
 		String s = "";
@@ -130,123 +132,165 @@ public class Face
 			he = he.next();		// Rotate to line up with vertices in vector
 		}
 		
-		int v1 = vertices.get(0).getIndex();
-		int v2 = vertices.get(1).getIndex();
-		int v3 = vertices.get(2).getIndex();
-		int v4 = vertices.get(3).getIndex();		
+		// Indices of corner vertices
+		int c1 = vertices.get(0).getIndex();
+		int c2 = vertices.get(1).getIndex();
+		int c3 = vertices.get(2).getIndex();
+		int c4 = vertices.get(3).getIndex();
 		
-		// Find which neighbouring sides have been divided more than this one
-		boolean side1, side2, side3, side4;
+		// Indices of (potential) side vertices
+		int s41 = 0, s12 = 0, s23 = 0, s34 = 0;
 		
-		side1 = divLevel < he.sym().face().divLevel;	he = he.next();
-		side2 = divLevel < he.sym().face().divLevel;	he = he.next();
-		side3 = divLevel < he.sym().face().divLevel;	he = he.next();
-		side4 = divLevel < he.sym().face().divLevel;
+		int situation = 0;		// Used to decide how to split the quadrilateral into triangles
 		
-		if(side1)
+		// Find which sides have been split extra times, and extract relevant information
+		if(divLevel < he.sym().face().divLevel)
 		{
-			if(side2)
-			{
-				if(side3)
-				{
-					if(side4)	// 1,2,3,4
-					{
-						
-					}
-					else		// 1,2,3
-					{
-						
-					}
-				}
-				else
-				{
-					if(side4)	// 1,2,4
-					{
-						
-					}
-					else		// 1,2
-					{
-						
-					}
-				}
-			}
-			else
-			{
-				if(side3)
-				{
-					if(side4)	// 1,3,4
-					{
-						
-					}
-					else		// 1,3
-					{
-						
-					}
-				}
-				else
-				{
-					if(side4)	// 1,4
-					{
-						
-					}
-					else		// 1
-					{
-						
-					}
-				}
-			}
+			situation += 1;
+			s41 = he.sym().vertex().getIndex();			// c1------s12------c2
+		}												//  |				|
+		he = he.next();									//  |				|
+		if(divLevel < he.sym().face().divLevel)			// s41			   s23
+		{												//  |				|
+			situation += 2;								//  |				|
+			s12 = he.sym().vertex().getIndex();			// c4------s34------c3
 		}
-		else
+		he = he.next();
+		if(divLevel < he.sym().face().divLevel)
 		{
-			if(side2)
+			situation += 4;
+			s23 = he.sym().vertex().getIndex();
+		}
+		he = he.next();
+		if(divLevel < he.sym().face().divLevel)
+		{
+			situation += 8;
+			s34 = he.sym().vertex().getIndex();
+		}
+		
+		switch(situation)
+		{
+			case(0):		// Extra points: none
 			{
-				if(side3)
-				{
-					if(side4)	// 2,3,4
-					{
-						
-					}
-					else		// 2,3
-					{
-						
-					}
-				}
-				else
-				{
-					if(side4)	// 2,4
-					{
-						
-					}
-					else		// 2
-					{
-						
-					}
-				}
+				s = "4 "+c1+" "+c2+" "+c3+" "+c4;
+				break;
 			}
-			else
+			case(1):		// Extra points: s41
 			{
-				if(side3)
-				{
-					if(side4)	// 3,4
-					{
-						
-					}
-					else		// 3
-					{
-						
-					}
-				}
-				else
-				{
-					if(side4)	// 4
-					{
-						
-					}
-					else		// All sides the same as this one
-					{
-						s = "4 "+v1+" "+v2+" "+v3+" "+v4;
-					}
-				}
+				s = "3 "+s41+" "+c1+" "+c2+"\n" +
+					"3 "+s41+" "+c2+" "+c3+"\n" +
+					"3 "+s41+" "+c3+" "+c4;
+				break;
+			}
+			case(2):		// Extra points: s12
+			{
+				s = "3 "+s12+" "+c4+" "+c1+"\n" +
+					"3 "+s12+" "+c2+" "+c3+"\n" +
+					"3 "+s12+" "+c3+" "+c4;
+				break;
+			}
+			case(3):		// Extra points: s41 s12
+			{
+				s = "3 "+s41+" "+c1+" "+s12+"\n" +
+					"3 "+s41+" "+s12+" "+c3+"\n" +
+					"3 "+s12+" "+c2+" "+c3+"\n" +
+					"3 "+s41+" "+c3+" "+c4;
+				break;
+			}
+			case(4):		// Extra points: s23
+			{
+				s = "3 "+s23+" "+c1+" "+c2+"\n" +
+					"3 "+s23+" "+c3+" "+c4+"\n" +
+					"3 "+s23+" "+c4+" "+c1;
+				break;
+			}
+			case(5):		// Extra points: s41 s23
+			{
+				s = "4 "+s41+" "+c1+" "+c2+" "+s23+"\n" +
+					"4 "+s23+" "+c3+" "+c4+" "+s41;
+				break;
+			}
+			case(6):		// Extra points: s12 s23
+			{
+				s = "3 "+s12+" "+c2+" "+s23+"\n" +
+					"3 "+s12+" "+s23+" "+c4+"\n" +
+					"3 "+s23+" "+c3+" "+c4+"\n" +
+					"3 "+s12+" "+c4+" "+c1;
+				break;
+			}
+			case(7):		// Extra points: s41 s12 s23
+			{
+				s = "3 "+s12+" "+c2+" "+s23+"\n" +
+					"3 "+s12+" "+s23+" "+c3+"\n" +
+					"3 "+s12+" "+c3+" "+c4+"\n" +
+					"3 "+s12+" "+c4+" "+s41+"\n" +
+					"3 "+s12+" "+s41+" "+c1;
+				break;
+			}
+			case(8):		// Extra points: s34
+			{
+				s = "3 "+s34+" "+c1+" "+c2+"\n" +
+					"3 "+s34+" "+c2+" "+c3+"\n" +
+					"3 "+s34+" "+c4+" "+c1;
+				break;
+			}
+			case(9):		// Extra points: s41 s34
+			{
+				s = "3 "+s34+" "+c4+" "+s41+"\n" +
+					"3 "+s34+" "+s41+" "+c2+"\n" +
+					"3 "+s41+" "+c1+" "+c2+"\n" +
+					"3 "+s34+" "+c2+" "+c3;
+				break;
+			}
+			case(10):		// Extra points: s12 s34
+			{
+				s = "4 "+s12+" "+c2+" "+c3+" "+s34+"\n" +
+					"4 "+s34+" "+c4+" "+c1+" "+s12;
+				break;
+			}
+			case(11):		// Extra points: s41 s12 s34
+			{
+				s = "3 "+s41+" "+c1+" "+s12+"\n" +
+					"3 "+s41+" "+s12+" "+c2+"\n" +
+					"3 "+s41+" "+c2+" "+c3+"\n" +
+					"3 "+s41+" "+c3+" "+s34+"\n" +
+					"3 "+s41+" "+s34+" "+c4;
+				break;
+			}
+			case(12):		// Extra points: s23 s34
+			{
+				s = "3 "+s23+" "+c3+" "+s34+"\n" +
+					"3 "+s23+" "+s34+" "+c1+"\n" +
+					"3 "+s34+" "+c4+" "+c1+"\n" +
+					"3 "+s23+" "+c1+" "+c2;
+				break;
+			}
+			case(13):		// Extra points: s41 s23 s34
+			{
+				s = "3 "+s34+" "+c4+" "+s41+"\n" +
+					"3 "+s34+" "+s41+" "+c1+"\n" +
+					"3 "+s34+" "+c1+" "+c2+"\n" +
+					"3 "+s34+" "+c2+" "+s23+"\n" +
+					"3 "+s34+" "+s23+" "+c3;
+				break;
+			}
+			case(14):		// Extra points: s12 s23 s34
+			{
+				s = "3 "+s23+" "+c3+" "+s34+"\n" +
+					"3 "+s23+" "+s34+" "+c4+"\n" +
+					"3 "+s23+" "+c4+" "+c1+"\n" +
+					"3 "+s23+" "+c1+" "+s12+"\n" +
+					"3 "+s23+" "+s12+" "+c2;
+				break;
+			}
+			case(15):		// Extra points: s41 s12 s23 s34
+			{
+				s = "3 "+s12+" "+c2+" "+s23+"\n" +
+					"3 "+s23+" "+c3+" "+s34+"\n" +
+					"3 "+s34+" "+c4+" "+s41+"\n" +
+					"3 "+s41+" "+c1+" "+s12+"\n" +
+					"4 "+s12+" "+s23+" "+s34+" "+s41;
+				break;
 			}
 		}
 		
