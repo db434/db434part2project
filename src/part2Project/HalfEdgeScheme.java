@@ -1,5 +1,6 @@
 package part2Project;
 
+import java.io.*;
 import java.util.*;
 
 public class HalfEdgeScheme
@@ -70,7 +71,7 @@ public class HalfEdgeScheme
 	// Method to adjust positions of vertices
 	private void smooth(int degree, int step)
 	{
-		valencyToWeight.clear();
+		valencyToAlpha.clear();
 		
 		// for all halfedges' vertices, make contributions
 		for(HalfEdge e : edges)
@@ -78,10 +79,10 @@ public class HalfEdgeScheme
 			Vertex v = e.vertex();
 			if(!v.contributed)
 			{
-				float weight = getWeight(e, degree, step);
-				float self = weight*weight;
-				float neighbour = weight*(1-weight)/2;			//
-				float diagonal = (1-weight)*(1-weight)/4;		//
+				int valency = generateWeights(e, degree, step);
+				float self = valencyToAlpha.get(valency);
+				float neighbour = valencyToBeta.get(valency);
+				float diagonal = valencyToGamma.get(valency);
 				v.contribute(e, self, neighbour, diagonal);
 			}			
 		}
@@ -99,11 +100,16 @@ public class HalfEdgeScheme
 	}
 	
 	// Store weights so they don't have to be recomputed
-	private HashMap<Integer, Float> valencyToWeight = new HashMap<Integer, Float>();
+	private HashMap<Integer, Float> valencyToAlpha = new HashMap<Integer, Float>();
+	private HashMap<Integer, Float> valencyToBeta = new HashMap<Integer, Float>();
+	private HashMap<Integer, Float> valencyToGamma = new HashMap<Integer, Float>();
 	
-	// TODO: Perhaps extend to return all three weights (self, neighbour, diagonal)?
-	// Returns the primary weight for the edge's vertex to use
-	private float getWeight(HalfEdge e, int degree, int step)
+	private static int headerLength = 577;
+	private static int lineLength = 236;
+	private static int tableLength = 97*lineLength + 10;	// Minus one line, to account for reading one
+	
+	// Returns the valency of the edge's vertex, to allow access to the HashMaps
+	private int generateWeights(HalfEdge e, int degree, int step)
 	{
 		int valency = 1;
 		HalfEdge he = e;
@@ -115,32 +121,73 @@ public class HalfEdgeScheme
 		
 		float weight;
 		
-		if(valencyToWeight.containsKey(valency))	// Already computed
+		if(valencyToAlpha.containsKey(valency))	// Already computed
 		{
-			weight = valencyToWeight.get(valency);
+			weight = valencyToAlpha.get(valency);
 		}
-		else										// Need to compute
+		else if((degree%2) == 0)					// The file doesn't contain even degree data
 		{
-			float d = degree;
-			float s = step;
+			calculateWeight(valency, degree, step);
+		}
+		else try									// Read the file of weights
+		{System.out.println("===== "+valency+" =====");	
+			BufferedReader file = new BufferedReader(new FileReader(
+					System.getProperty("user.dir") + "\\bounded_curvature_tables.txt"));
 			
-			//if(valency == 4)	// Main case
-			{
-				if(degree%2 == 0)	// Even degree
-				{
-					weight = (s+1)/(2*(d-s+1));
-				}
-				else
-				{
-					weight = s/(d-s);
-				}
-			}
-			//weight *= 4/valency;
+			// Read the alpha (self) value
+			file.skip(headerLength + (valency-3)*lineLength);
+			String line = file.readLine();
+			String[] values = line.split("[ \n\t\r]+");
 			
-			valencyToWeight.put(valency, weight);
+			// The first value seems to be blank, so don't subtract 1 here.
+			weight = Float.parseFloat(values[degree/2]);		System.out.println(weight);	
+			
+			valencyToAlpha.put(valency, weight);
+			
+			// Read the beta (neighbour) value
+			file.skip(tableLength);
+			line = file.readLine();
+			values = line.split("[ \n\t\r]+");
+			weight = Float.parseFloat(values[degree/2]);System.out.println(weight);	
+			valencyToBeta.put(valency, weight);
+			
+			// Read the gamma (diagonal) value
+			file.skip(tableLength+1);
+			line = file.readLine();
+			values = line.split("[ \n\t\r]+");
+			weight = Float.parseFloat(values[degree/2]);System.out.println(weight);	
+			valencyToGamma.put(valency, weight);			
+		}
+		catch(Exception excpt)						// Calculate the weight crudely
+		{
+			calculateWeight(valency, degree, step);
 		}
 		
-		return weight;
+		return valency;
+	}
+	
+	private void calculateWeight(int valency, int degree, int step)
+	{
+		float weight;
+		float d = degree;
+		float s = step;
+		
+		//if(valency == 4)	// Main case
+		{
+			if(degree%2 == 0)	// Even degree
+			{
+				weight = (s+1)/(2*(d-s+1));
+			}
+			else
+			{
+				weight = s/(d-s);
+			}
+		}
+		//weight *= 4/valency;
+		
+		valencyToAlpha.put(valency, weight*weight);
+		valencyToBeta.put(valency, weight*(1-weight)/2);
+		valencyToBeta.put(valency, (1-weight)*(1-weight)/4);
 	}
 	
 	public void addVertex(Vertex v)		{vertices.add(v);}
