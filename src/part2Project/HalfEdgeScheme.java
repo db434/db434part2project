@@ -106,7 +106,7 @@ public class HalfEdgeScheme
 	
 	private static int headerLength = 577;
 	private static int lineLength = 236;
-	private static int tableLength = 97*lineLength + 10;	// Minus one line, to account for reading one
+	private static int tableLength = 97*lineLength + 10;
 	
 	// Returns the valency of the edge's vertex, to allow access to the HashMaps
 	private int generateWeights(HalfEdge e, int degree, int step)
@@ -130,7 +130,11 @@ public class HalfEdgeScheme
 			calculateWeight(valency, degree, step);
 		}
 		else try									// Read the file of weights
-		{System.out.println("===== "+valency+" =====");	
+		{
+			calculateWeight(valency, degree, step);
+			
+			System.out.println("===== "+valency+" =====");
+			
 			BufferedReader file = new BufferedReader(new FileReader(
 					System.getProperty("user.dir") + "\\bounded_curvature_tables.txt"));
 			
@@ -142,21 +146,21 @@ public class HalfEdgeScheme
 			// The first value seems to be blank, so don't subtract 1 here.
 			weight = Float.parseFloat(values[degree/2]);		System.out.println(weight);	
 			
-			valencyToAlpha.put(valency, weight);
+			valencyToAlpha.put(valency, weight*valencyToAlpha.get(valency));
 			
 			// Read the beta (neighbour) value
 			file.skip(tableLength);
 			line = file.readLine();
 			values = line.split("[ \n\t\r]+");
 			weight = Float.parseFloat(values[degree/2]);System.out.println(weight);	
-			valencyToBeta.put(valency, weight);
+			valencyToBeta.put(valency, weight*valencyToBeta.get(valency));
 			
 			// Read the gamma (diagonal) value
 			file.skip(tableLength+1);
 			line = file.readLine();
 			values = line.split("[ \n\t\r]+");
 			weight = Float.parseFloat(values[degree/2]);System.out.println(weight);	
-			valencyToGamma.put(valency, weight);			
+			valencyToGamma.put(valency, weight*valencyToGamma.get(valency));			
 		}
 		catch(Exception excpt)						// Calculate the weight crudely
 		{
@@ -187,7 +191,7 @@ public class HalfEdgeScheme
 		
 		valencyToAlpha.put(valency, weight*weight);
 		valencyToBeta.put(valency, weight*(1-weight)/2);
-		valencyToBeta.put(valency, (1-weight)*(1-weight)/4);
+		valencyToGamma.put(valency, (1-weight)*(1-weight)/4);
 	}
 	
 	public void addVertex(Vertex v)		{vertices.add(v);}
