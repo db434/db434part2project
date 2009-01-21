@@ -71,6 +71,10 @@ public class HalfEdgeScheme
 	private void smooth(int degree, int step)
 	{
 		valencyToAlpha.clear();
+		valencyToBeta.clear();
+		valencyToGamma.clear();
+		
+		boolean oddStep = (step%2 == 1);
 		
 		// for all halfedges' vertices, make contributions
 		for(HalfEdge e : edges)
@@ -78,33 +82,32 @@ public class HalfEdgeScheme
 			Vertex v = e.vertex();
 			if(!v.contributed)
 			{
-				int valency = v.valency;//generateWeights(e, degree, step);
+				int valency = v.valency;
 				calculateWeights(valency, degree, step);
 				float self = valencyToAlpha.get(valency);
 				float neighbour = valencyToBeta.get(valency);
 				float diagonal = valencyToGamma.get(valency);
 				
-				if(true /*sometimes you don't want multipliers*/)
+				if(true /*sometimes you don't want multipliers?*/)
 				{
 					self *= MainClass.readMult(1, valency);
 					neighbour *= MainClass.readMult(2, valency);
 					diagonal *= MainClass.readMult(3, valency);
 				}
+				if(v.valency == 3) self = 0;	// Remove when we have a final smoothing step
 				
-				v.contribute(e, self, neighbour, diagonal);
+				v.contribute(e, self, neighbour, diagonal, oddStep);
 			}			
 		}
 		
-		// Want new points to move on even steps, and old ones to move on odd steps
-		boolean wantOld = (step%2 == 1);
-		for(Vertex v : vertices) v.smooth(wantOld);
+		for(Vertex v : vertices) v.smooth(oddStep);
 	}
 	
 	// Method to remove any temporary statuses, to prepare for the next subdivision step
 	private void reset()
 	{
 		for(HalfEdge h : edges) h.hasBeenSplit = false;
-		for(Vertex v : vertices) v.isOld = true;
+		for(Vertex v : vertices) v.setToOld();
 	}
 	
 	// Store weights so they don't have to be recomputed
@@ -142,7 +145,7 @@ public class HalfEdgeScheme
 	public void addVertex(double x, double y, double z)
 	{
 		Vertex v = new Vertex(x,y,z);
-		v.isOld = true;
+		v.setToOld();
 		vertices.add(v);
 	}
 	

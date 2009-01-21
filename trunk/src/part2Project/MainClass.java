@@ -84,6 +84,7 @@ public class MainClass
 	private static HashMap<Integer, Double> valencyToBeta = new HashMap<Integer, Double>();
 	private static HashMap<Integer, Double> valencyToGamma = new HashMap<Integer, Double>();
 	
+	// Read multiplier values from the file of tables
 	public static double readMult(int table, int valency)
 	{
 		double multiplier;
