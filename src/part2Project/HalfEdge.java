@@ -57,9 +57,9 @@ public class HalfEdge
 			e.sym = sym;
 			
 			Vertex midpoint = midpoint();
-			midpoint.isOld = true;	// Vertices on existing edges count as old?
 			hes.addVertex(midpoint);
 			midpoint.valency = 4;	// Is this a safe assumption?
+			midpoint.setToEdge();
 			
 			vertex = midpoint;
 			face = f2;

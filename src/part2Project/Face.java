@@ -46,6 +46,7 @@ public class Face
 			Vertex centre = Vertex.weightedAverage(w1.vertex(), e1.vertex());
 			hes.addVertex(centre);
 			centre.valency = 4;
+			centre.setToFace();
 			
 			// Create all half-edges leading to and from the centre
 			HalfEdge CtoN = new HalfEdge(n1.vertex(), NW);
