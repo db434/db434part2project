@@ -43,8 +43,9 @@ public class Face
 			HalfEdge e2 = e1.split(hes, SE, NE);
 			HalfEdge n2 = n1.split(hes, NE, NW);
 			
-			Vertex centre = Vertex.average(w1.vertex(), e1.vertex());
+			Vertex centre = Vertex.weightedAverage(w1.vertex(), e1.vertex());
 			hes.addVertex(centre);
+			centre.valency = 4;
 			
 			// Create all half-edges leading to and from the centre
 			HalfEdge CtoN = new HalfEdge(n1.vertex(), NW);
@@ -105,7 +106,7 @@ public class Face
 			// Could check how flat the polygon is
 			if((divReason == DivideBy.CURVATURE) || (divReason == DivideBy.BOTH))
 			{
-				
+				divide = minCurvature > 0;
 			}
 		}
 		

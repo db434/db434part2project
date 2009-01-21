@@ -1,6 +1,5 @@
 package part2Project;
 
-import java.io.*;
 import java.util.*;
 
 public class HalfEdgeScheme
@@ -79,10 +78,19 @@ public class HalfEdgeScheme
 			Vertex v = e.vertex();
 			if(!v.contributed)
 			{
-				int valency = generateWeights(e, degree, step);
+				int valency = v.valency;//generateWeights(e, degree, step);
+				calculateWeights(valency, degree, step);
 				float self = valencyToAlpha.get(valency);
 				float neighbour = valencyToBeta.get(valency);
 				float diagonal = valencyToGamma.get(valency);
+				
+				if(true /*sometimes you don't want multipliers*/)
+				{
+					self *= MainClass.readMult(1, valency);
+					neighbour *= MainClass.readMult(2, valency);
+					diagonal *= MainClass.readMult(3, valency);
+				}
+				
 				v.contribute(e, self, neighbour, diagonal);
 			}			
 		}
@@ -104,80 +112,14 @@ public class HalfEdgeScheme
 	private HashMap<Integer, Float> valencyToBeta = new HashMap<Integer, Float>();
 	private HashMap<Integer, Float> valencyToGamma = new HashMap<Integer, Float>();
 	
-	private static int headerLength = 577;
-	private static int lineLength = 236;
-	private static int tableLength = 97*lineLength + 10;
-	
-	// Returns the valency of the edge's vertex, to allow access to the HashMaps
-	private int generateWeights(HalfEdge e, int degree, int step)
-	{
-		int valency = 1;
-		HalfEdge he = e;
-		
-		while(!(he = he.next().sym()).equals(e))
+	private void calculateWeights(int valency, int degree, int step)
+	{		
+		if(!valencyToAlpha.containsKey(valency))
 		{
-			valency++;
-		}
-		
-		float weight;
-		
-		if(valencyToAlpha.containsKey(valency))	// Already computed
-		{
-			weight = valencyToAlpha.get(valency);
-		}
-		else if((degree%2) == 0)					// The file doesn't contain even degree data
-		{
-			calculateWeight(valency, degree, step);
-		}
-		else try									// Read the file of weights
-		{
-			calculateWeight(valency, degree, step);
+			float weight;
+			float d = degree;
+			float s = step;			
 			
-			System.out.println("===== "+valency+" =====");
-			
-			BufferedReader file = new BufferedReader(new FileReader(
-					System.getProperty("user.dir") + "\\bounded_curvature_tables.txt"));
-			
-			// Read the alpha (self) value
-			file.skip(headerLength + (valency-3)*lineLength);
-			String line = file.readLine();
-			String[] values = line.split("[ \n\t\r]+");
-			
-			// The first value seems to be blank, so don't subtract 1 here.
-			weight = Float.parseFloat(values[degree/2]);		System.out.println(weight);	
-			
-			valencyToAlpha.put(valency, weight*valencyToAlpha.get(valency));
-			
-			// Read the beta (neighbour) value
-			file.skip(tableLength);
-			line = file.readLine();
-			values = line.split("[ \n\t\r]+");
-			weight = Float.parseFloat(values[degree/2]);System.out.println(weight);	
-			valencyToBeta.put(valency, weight*valencyToBeta.get(valency));
-			
-			// Read the gamma (diagonal) value
-			file.skip(tableLength+1);
-			line = file.readLine();
-			values = line.split("[ \n\t\r]+");
-			weight = Float.parseFloat(values[degree/2]);System.out.println(weight);	
-			valencyToGamma.put(valency, weight*valencyToGamma.get(valency));			
-		}
-		catch(Exception excpt)						// Calculate the weight crudely
-		{
-			calculateWeight(valency, degree, step);
-		}
-		
-		return valency;
-	}
-	
-	private void calculateWeight(int valency, int degree, int step)
-	{
-		float weight;
-		float d = degree;
-		float s = step;
-		
-		//if(valency == 4)	// Main case
-		{
 			if(degree%2 == 0)	// Even degree
 			{
 				weight = (s+1)/(2*(d-s+1));
@@ -186,12 +128,11 @@ public class HalfEdgeScheme
 			{
 				weight = s/(d-s);
 			}
-		}
-		//weight *= 4/valency;
-		
-		valencyToAlpha.put(valency, weight*weight);
-		valencyToBeta.put(valency, weight*(1-weight)/2);
-		valencyToGamma.put(valency, (1-weight)*(1-weight)/4);
+							
+			valencyToAlpha.put(valency, weight*weight);
+			valencyToBeta.put(valency, weight*(1-weight)/2);
+			valencyToGamma.put(valency, (1-weight)*(1-weight)/4);
+		}		
 	}
 	
 	public void addVertex(Vertex v)		{vertices.add(v);}
@@ -209,6 +150,7 @@ public class HalfEdgeScheme
 	{
 		HalfEdge h = new HalfEdge(v2, f);
 		edges.add(h);
+		v2.valency++;
 		
 		Pair p = new Pair(v2,v1);
 		
