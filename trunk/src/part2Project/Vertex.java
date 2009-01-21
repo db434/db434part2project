@@ -8,6 +8,7 @@ public class Vertex
 	
 	static int numVertices = 0;
 	private int index;
+	public int valency = 0;
 	
 	public boolean isOld = false;	// When smoothing, only old vertices make contributions
 	public boolean contributed = false;
@@ -67,11 +68,15 @@ public class Vertex
 		contributed = false;
 	}
 	
-	public static Vertex average(Vertex v1, Vertex v2)
+	// Takes into account the valencies/multipliers of the vertices
+	public static Vertex weightedAverage(Vertex v1, Vertex v2)
 	{
-		return new Vertex((v1.x + v2.x)/2,
-						  (v1.y + v2.y)/2,
-						  (v1.z + v2.z)/2);
+		double mult1 = MainClass.readMult(2, v1.valency);
+		double mult2 = MainClass.readMult(2, v2.valency);
+		
+		return new Vertex((v1.x*mult1 + v2.x*mult2)/(mult1 + mult2),
+						  (v1.y*mult1 + v2.y*mult2)/(mult1 + mult2),
+						  (v1.z*mult1 + v2.z*mult2)/(mult1 + mult2));
 	}
 	
 	public static double distBetween(Vertex v1, Vertex v2)

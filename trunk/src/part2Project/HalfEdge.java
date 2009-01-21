@@ -11,7 +11,7 @@ public class HalfEdge
 	public HalfEdge(Vertex v, Face f)
 	{
 		vertex = v;
-		sym = null;		//Parent Edge sets this
+		sym = null;
 		next = null;	//Associated Face sets this
 		face = f;
 	}
@@ -36,7 +36,7 @@ public class HalfEdge
 	
 	public Vertex midpoint()
 	{
-		return Vertex.average(vertex, sym.vertex);
+		return Vertex.weightedAverage(vertex, sym.vertex);
 	}
 	
 	public HalfEdge split(HalfEdgeScheme hes, Face f1, Face f2)
@@ -56,9 +56,10 @@ public class HalfEdge
 		{
 			e.sym = sym;
 			
-			Vertex midpoint = Vertex.average(vertex, sym.vertex);
+			Vertex midpoint = midpoint();
 			midpoint.isOld = true;	// Vertices on existing edges count as old?
 			hes.addVertex(midpoint);
+			midpoint.valency = 4;	// Is this a safe assumption?
 			
 			vertex = midpoint;
 			face = f2;
