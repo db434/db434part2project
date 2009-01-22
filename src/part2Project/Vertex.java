@@ -4,7 +4,7 @@ public class Vertex
 {
 	private double x,y,z;
 	private double nextx, nexty, nextz;
-	private float totalWeight = 0;
+	private double totalWeight = 0;
 	
 	static int numVertices = 0;
 	private int index;
@@ -24,6 +24,10 @@ public class Vertex
 		
 		index = numVertices++;
 	}
+	
+	public double getX() {return x;}
+	public double getY() {return y;}
+	public double getZ() {return z;}
 	
 	public void move(double x, double y, double z)
 	{
@@ -68,11 +72,11 @@ public class Vertex
 	}
 	
 	// Add a contribution from vertex v
-	public void addContribution(Vertex v, float weight, boolean oddStep)
+	public void addContribution(Vertex v, double weight, boolean oddStep)
 	{
 		if(v.shouldContribute(this, oddStep))
 		{
-			float norm = totalWeight + weight;
+			double norm = totalWeight + weight;
 			nextx = nextx * (totalWeight/norm) + v.x * (weight/norm);
 			nexty = nexty * (totalWeight/norm) + v.y * (weight/norm);
 			nextz = nextz * (totalWeight/norm) + v.z * (weight/norm);
@@ -105,6 +109,37 @@ public class Vertex
 		contributed = false;
 	}
 	
+	// A special final contribution step for vertices of valency 3
+	public void valency3Smooth(HalfEdge e, double rho)
+	{
+		if(!contributed && valency == 3)
+		{
+			double delta = MainClass.readMult(4, 3);
+			double self = rho;
+			double edge = (1-rho)*(1-delta)/3;
+			double diagonal = (1-rho)*delta/3;
+			
+			HalfEdge he = e;
+			
+			addContribution(this, self, true);
+			
+			for(int i=0; i<3; i++)
+			{
+				HalfEdge he2 = he.sym();
+				Vertex v = he2.vertex();
+				addContribution(v, edge, false);
+				
+				// Access different points depending on if the face has been divided or not
+				if(v.old) 	addContribution(he2.next().vertex(), diagonal, true);
+				else		addContribution(he2.ahead().next().ahead().vertex(), diagonal, true);
+				
+				he = he.next();
+			}
+		}
+		
+		contributed = true;
+	}
+	
 	// Takes into account the valencies/multipliers of the vertices
 	public static Vertex weightedAverage(Vertex v1, Vertex v2)
 	{
@@ -114,6 +149,20 @@ public class Vertex
 		return new Vertex((v1.x*mult1 + v2.x*mult2)/(mult1 + mult2),
 						  (v1.y*mult1 + v2.y*mult2)/(mult1 + mult2),
 						  (v1.z*mult1 + v2.z*mult2)/(mult1 + mult2));
+	}
+	
+	// For vertices created in the centre of faces
+	public static Vertex weightedAverage(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
+	{
+		double mult1 = MainClass.readMult(3, v1.valency);
+		double mult2 = MainClass.readMult(3, v2.valency);
+		double mult3 = MainClass.readMult(3, v3.valency);
+		double mult4 = MainClass.readMult(3, v4.valency);
+		double total = mult1 + mult2 + mult3 + mult4;
+		
+		return new Vertex((v1.x*mult1 + v2.x*mult2 + v3.x*mult3 + v4.x*mult4)/total,
+						  (v1.y*mult1 + v2.y*mult2 + v3.y*mult3 + v4.y*mult4)/total,
+						  (v1.z*mult1 + v2.z*mult2 + v3.z*mult3 + v4.z*mult4)/total);
 	}
 	
 	public static double distBetween(Vertex v1, Vertex v2)

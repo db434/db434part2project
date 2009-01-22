@@ -51,6 +51,7 @@ public class HalfEdgeScheme
 	{
 		refine();
 		for(int step=1; step<=(degree/2); step++) smooth(degree, step);
+		valency3Smooth();
 		
 		reset();
 	}
@@ -94,7 +95,7 @@ public class HalfEdgeScheme
 					neighbour *= MainClass.readMult(2, valency);
 					diagonal *= MainClass.readMult(3, valency);
 				}
-				if(v.valency == 3) self = 0;	// Remove when we have a final smoothing step
+				//if(v.valency == 3) self = 0;	// Remove when we have a final smoothing step
 				
 				v.contribute(e, self, neighbour, diagonal, oddStep);
 			}			
@@ -103,17 +104,44 @@ public class HalfEdgeScheme
 		for(Vertex v : vertices) v.smooth(oddStep);
 	}
 	
+	private void valency3Smooth()
+	{
+		Vector<Vertex> valency3 = new Vector<Vertex>();
+		
+		for(HalfEdge e : edges)
+		{
+			Vertex v = e.vertex();
+			
+			if(v.valency == 3 && !v.contributed)
+			{
+				v.valency3Smooth(e, rho);
+				valency3.add(v);				
+			}			
+		}
+		
+		for(Vertex v : valency3)
+		{
+			v.smooth(true);
+		}
+	}
+	
 	// Method to remove any temporary statuses, to prepare for the next subdivision step
 	private void reset()
 	{
 		for(HalfEdge h : edges) h.hasBeenSplit = false;
-		for(Vertex v : vertices) v.setToOld();
+		for(Vertex v : vertices)
+		{
+			v.setToOld();
+			v.contributed = false;
+		}
+		rho = 1;
 	}
 	
 	// Store weights so they don't have to be recomputed
 	private HashMap<Integer, Float> valencyToAlpha = new HashMap<Integer, Float>();
 	private HashMap<Integer, Float> valencyToBeta = new HashMap<Integer, Float>();
 	private HashMap<Integer, Float> valencyToGamma = new HashMap<Integer, Float>();
+	private float rho = 1;
 	
 	private void calculateWeights(int valency, int degree, int step)
 	{		
@@ -131,10 +159,19 @@ public class HalfEdgeScheme
 			{
 				weight = s/(d-s);
 			}
+			
+			float alpha = weight*weight;
+			float beta = weight*(1-weight)/2;
+			float gamma = (1-weight)*(1-weight)/4;
 							
-			valencyToAlpha.put(valency, weight*weight);
-			valencyToBeta.put(valency, weight*(1-weight)/2);
-			valencyToGamma.put(valency, (1-weight)*(1-weight)/4);
+			valencyToAlpha.put(valency, alpha);
+			valencyToBeta.put(valency, beta);
+			valencyToGamma.put(valency, gamma);
+			
+			if(valency==3 && (step%2)==1)	// Update rho
+			{
+				rho *= alpha/(alpha + 3*beta + 3*gamma);
+			}
 		}		
 	}
 	
