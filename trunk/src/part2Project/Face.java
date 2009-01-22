@@ -44,6 +44,8 @@ public class Face
 			HalfEdge n2 = n1.split(hes, NE, NW);
 			
 			Vertex centre = Vertex.weightedAverage(w1.vertex(), e1.vertex());
+			//Vertex centre = Vertex.weightedAverage(vertices.get(0), vertices.get(1),
+			//									   vertices.get(2), vertices.get(3));
 			hes.addVertex(centre);
 			centre.valency = 4;
 			centre.setToFace();

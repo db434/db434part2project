@@ -83,6 +83,7 @@ public class MainClass
 	private static HashMap<Integer, Double> valencyToAlpha = new HashMap<Integer, Double>();
 	private static HashMap<Integer, Double> valencyToBeta = new HashMap<Integer, Double>();
 	private static HashMap<Integer, Double> valencyToGamma = new HashMap<Integer, Double>();
+	private static double delta = 0;
 	
 	// Read multiplier values from the file of tables
 	public static double readMult(int table, int valency)
@@ -103,6 +104,10 @@ public class MainClass
 		{
 			multiplier = valencyToGamma.get(valency);
 		}
+		else if((table == 4) && (delta != 0))
+		{
+			multiplier = delta;
+		}
 		else try
 		{
 			BufferedReader file = new BufferedReader(new FileReader(multFile));
@@ -110,6 +115,7 @@ public class MainClass
 			int position = headerLength + (valency-3)*lineLength;
 			if(table>1) position += tableLength;
 			if(table>2) position += tableLength+1;		// "Gamma" is longer than "Beta"
+			if(table>3) position += tableLength+1;		// So is "Delta"
 			
 			file.skip(position);
 			
@@ -122,6 +128,7 @@ public class MainClass
 			if(table==1) valencyToAlpha.put(valency, multiplier);
 			if(table==2) valencyToBeta.put(valency, multiplier);
 			if(table==3) valencyToGamma.put(valency, multiplier);
+			if(table==4) delta = multiplier;
 		}
 		catch(Exception e)
 		{
