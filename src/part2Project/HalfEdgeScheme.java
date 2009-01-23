@@ -95,8 +95,7 @@ public class HalfEdgeScheme
 					neighbour *= MainClass.readMult(2, valency);
 					diagonal *= MainClass.readMult(3, valency);
 				}
-				//if(v.valency == 3) self = 0;	// Remove when we have a final smoothing step
-				
+								
 				v.contribute(e, self, neighbour, diagonal, oddStep);
 			}			
 		}
@@ -112,7 +111,7 @@ public class HalfEdgeScheme
 		{
 			Vertex v = e.vertex();
 			
-			if(v.valency == 3 && !v.contributed)
+			if((v.valency == 3) && !valency3.contains(v))
 			{
 				v.valency3Smooth(e, rho);
 				valency3.add(v);				

@@ -43,12 +43,13 @@ public class Face
 			HalfEdge e2 = e1.split(hes, SE, NE);
 			HalfEdge n2 = n1.split(hes, NE, NW);
 			
-			Vertex centre = Vertex.weightedAverage(w1.vertex(), e1.vertex());
-			//Vertex centre = Vertex.weightedAverage(vertices.get(0), vertices.get(1),
-			//									   vertices.get(2), vertices.get(3));
+			//Vertex centre = Vertex.weightedAverage(w2.vertex(), e2.vertex());
+			Vertex centre = Vertex.weightedAverage(w2.vertex(), s2.vertex(),
+												   e2.vertex(), n2.vertex());
 			hes.addVertex(centre);
 			centre.valency = 4;
 			centre.setToFace();
+			//System.out.println(centre);
 			
 			// Create all half-edges leading to and from the centre
 			HalfEdge CtoN = new HalfEdge(n1.vertex(), NW);
