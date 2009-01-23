@@ -109,10 +109,11 @@ public class Vertex
 		contributed = false;
 	}
 	
-	// A special final contribution step for vertices of valency 3
+	// A special final contribution step for vertices of valency 3.
+	// e is facing the vertex
 	public void valency3Smooth(HalfEdge e, double rho)
 	{
-		if(!contributed && valency == 3)
+		if(valency == 3)
 		{
 			double delta = MainClass.readMult(4, 3);
 			double self = rho;
@@ -127,17 +128,18 @@ public class Vertex
 			{
 				HalfEdge he2 = he.sym();
 				Vertex v = he2.vertex();
-				addContribution(v, edge, false);
+				
+				addContribution(v, edge, true);
 				
 				// Access different points depending on if the face has been divided or not
 				if(v.old) 	addContribution(he2.next().vertex(), diagonal, true);
 				else		addContribution(he2.ahead().next().ahead().vertex(), diagonal, true);
 				
-				he = he.next();
+				he = he.next().sym();
 			}
 		}
 		
-		contributed = true;
+		//contributed = true;
 	}
 	
 	// Takes into account the valencies/multipliers of the vertices
