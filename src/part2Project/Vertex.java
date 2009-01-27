@@ -36,6 +36,7 @@ public class Vertex
 		this.z = z;
 	}
 	
+	// Decides if this vertex should contribute to v
 	private boolean shouldContribute(Vertex v, boolean oddStep)
 	{
 		boolean result;
@@ -50,12 +51,13 @@ public class Vertex
 		{
 			if(old) 		result = v.edge || v.face;
 			else if(edge) 	result = v.edge || v.face;
-			else 			result = v.edge;
+			else 			result = v.face;
 		}
 		
 		return result;
 	}
 	
+	// Get contributions from all surrounding vertices
 	public void contribute(HalfEdge e, float self, float neighbour, float diagonal, boolean oddStep)
 	{
 		addContribution(this, self, oddStep);
@@ -63,8 +65,8 @@ public class Vertex
 		HalfEdge he = e;
 		do
 		{
-			he.sym().vertex().addContribution(this, neighbour, oddStep);
-			he.sym().next().vertex().addContribution(this, diagonal, oddStep);
+			addContribution(he.sym().vertex(), neighbour, oddStep);
+			addContribution(he.sym().next().vertex(), diagonal, oddStep);
 		}
 		while(!(he = he.next().sym()).equals(e));
 		
@@ -76,12 +78,18 @@ public class Vertex
 	{
 		if(v.shouldContribute(this, oddStep))
 		{
-			double norm = totalWeight + weight;
-			nextx = nextx * (totalWeight/norm) + v.x * (weight/norm);
-			nexty = nexty * (totalWeight/norm) + v.y * (weight/norm);
-			nextz = nextz * (totalWeight/norm) + v.z * (weight/norm);
-			totalWeight = norm;
+			defContribute(v, weight);
 		}
+	}
+	
+	// Get a contribution from v without performing any of the checks
+	private void defContribute(Vertex v, double weight)
+	{
+		double norm = totalWeight + weight;
+		nextx = nextx * (totalWeight/norm) + v.x * (weight/norm);
+		nexty = nexty * (totalWeight/norm) + v.y * (weight/norm);
+		nextz = nextz * (totalWeight/norm) + v.z * (weight/norm);
+		totalWeight = norm;
 	}
 	
 	private boolean shouldSmooth(boolean oddStep)
@@ -122,24 +130,22 @@ public class Vertex
 			
 			HalfEdge he = e;
 			
-			addContribution(this, self, true);
+			defContribute(this, self);
 			
 			for(int i=0; i<3; i++)
 			{
 				HalfEdge he2 = he.sym();
 				Vertex v = he2.vertex();
 				
-				addContribution(v, edge, true);
+				defContribute(v, edge);
 				
 				// Access different points depending on if the face has been divided or not
-				if(v.old) 	addContribution(he2.next().vertex(), diagonal, true);
-				else		addContribution(he2.ahead().next().ahead().vertex(), diagonal, true);
-				
+				if(v.old) 	defContribute(he2.next().vertex(), diagonal);
+				else		defContribute(he2.ahead().next().ahead().vertex(), diagonal);
+								
 				he = he.next().sym();
 			}
 		}
-		
-		//contributed = true;
 	}
 	
 	// Takes into account the valencies/multipliers of the vertices
