@@ -71,9 +71,8 @@ public class HalfEdgeScheme
 	// Method to adjust positions of vertices
 	private void smooth(int degree, int step)
 	{
-		valencyToAlpha.clear();
-		valencyToBeta.clear();
-		valencyToGamma.clear();
+		self = 0; neighbour = 0;
+		calculateWeights(degree, step);
 		
 		boolean oddStep = (step%2 == 1);
 		
@@ -84,19 +83,31 @@ public class HalfEdgeScheme
 			if(!v.contributed)
 			{
 				int valency = v.valency;
-				calculateWeights(valency, degree, step);
-				float self = valencyToAlpha.get(valency);
-				float neighbour = valencyToBeta.get(valency);
-				float diagonal = valencyToGamma.get(valency);
+				float alpha;
+				float beta;
+				float gamma;
+				
+				if(v.isEdge())
+				{
+					alpha = self;
+					beta = neighbour;
+					gamma = 0;
+				}
+				else
+				{
+					alpha = self*self;
+					beta = self*neighbour;
+					gamma = neighbour*neighbour;
+				}
 				
 				if(true /*sometimes you don't want multipliers?*/)
 				{
-					self *= MainClass.readMult(1, valency);
-					neighbour *= MainClass.readMult(2, valency);
-					diagonal *= MainClass.readMult(3, valency);
+					alpha *= MainClass.readMult(1, valency);
+					beta *= MainClass.readMult(2, valency);
+					gamma *= MainClass.readMult(3, valency);
 				}
 								
-				v.contribute(e, self, neighbour, diagonal, oddStep);
+				v.contribute(e, alpha, beta, gamma, oddStep);
 			}			
 		}
 		
@@ -137,14 +148,13 @@ public class HalfEdgeScheme
 	}
 	
 	// Store weights so they don't have to be recomputed
-	private HashMap<Integer, Float> valencyToAlpha = new HashMap<Integer, Float>();
-	private HashMap<Integer, Float> valencyToBeta = new HashMap<Integer, Float>();
-	private HashMap<Integer, Float> valencyToGamma = new HashMap<Integer, Float>();
 	private float rho = 1;
+	private float self;
+	private float neighbour;
 	
-	private void calculateWeights(int valency, int degree, int step)
+	private void calculateWeights(int degree, int step)
 	{		
-		if(!valencyToAlpha.containsKey(valency))
+		if(self == 0)
 		{
 			float weight;
 			float d = degree;
@@ -159,18 +169,14 @@ public class HalfEdgeScheme
 				weight = s/(d-s);
 			}
 			
-			float alpha = weight*weight;
-			float beta = weight*(1-weight)/2;
-			float gamma = (1-weight)*(1-weight)/4;
-							
-			valencyToAlpha.put(valency, alpha);
-			valencyToBeta.put(valency, beta);
-			valencyToGamma.put(valency, gamma);
+			self = weight;
+			neighbour = (1-weight)/2;
 			
-			if(valency==3 && (step%2)==1)	// Update rho
-			{
-				rho *= alpha/(alpha + 3*beta + 3*gamma);
-			}
+			float alpha = self*self;
+			float beta = self*neighbour;
+			float gamma = neighbour*neighbour;
+							
+			rho *= alpha/(alpha + 3*beta + 3*gamma);
 		}		
 	}
 	
