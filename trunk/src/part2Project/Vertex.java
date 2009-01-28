@@ -60,13 +60,15 @@ public class Vertex
 	// Get contributions from all surrounding vertices
 	public void contribute(HalfEdge e, float self, float neighbour, float diagonal, boolean oddStep)
 	{
-		addContribution(this, self, oddStep);
+		addContribution(this, self*MainClass.readMult(1, valency), oddStep);
 		
 		HalfEdge he = e;
 		do
 		{
-			addContribution(he.sym().vertex(), neighbour, oddStep);
-			addContribution(he.sym().next().vertex(), diagonal, oddStep);
+			Vertex n = he.sym().vertex();
+			Vertex d = he.sym().next().vertex();
+			addContribution(he.sym().vertex(), neighbour*MainClass.readMult(2, n.valency), oddStep);
+			addContribution(he.sym().next().vertex(), diagonal*MainClass.readMult(3, d.valency), oddStep);
 		}
 		while(!(he = he.next().sym()).equals(e));
 		

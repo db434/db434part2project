@@ -100,7 +100,7 @@ public class HalfEdgeScheme
 					gamma = neighbour*neighbour;
 				}
 				
-				if(true /*sometimes you don't want multipliers?*/)
+				if(false /*sometimes you don't want multipliers?*/)
 				{
 					alpha *= MainClass.readMult(1, valency);
 					beta *= MainClass.readMult(2, valency);
@@ -172,11 +172,14 @@ public class HalfEdgeScheme
 			self = weight;
 			neighbour = (1-weight)/2;
 			
-			float alpha = self*self;
-			float beta = self*neighbour;
-			float gamma = neighbour*neighbour;
-							
-			rho *= alpha/(alpha + 3*beta + 3*gamma);
+			if((step%2) == 1)
+			{
+				float alpha = self*self;
+				float beta = self*neighbour;
+				float gamma = neighbour*neighbour;
+								
+				rho *= alpha/(alpha + 3*beta + 3*gamma);
+			}
 		}		
 	}
 	
