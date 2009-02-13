@@ -39,6 +39,8 @@ public class HalfEdge
 		return Vertex.weightedAverage(vertex, sym.vertex);
 	}
 	
+	// Split this edge in two, returning the new half (this.ahead())
+	// f1 is for the new half, and f2 is for the old half
 	public HalfEdge split(HalfEdgeScheme hes, Face f1, Face f2)
 	{
 		HalfEdge e = new HalfEdge(vertex, f1);
@@ -49,6 +51,8 @@ public class HalfEdge
 			sym.sym = e;
 			
 			vertex = sym.vertex;	// Update to the midpoint
+			vertex.boundary = false;	// The mesh is now complete around vertex
+			
 			sym = sym.ahead();
 			face = f2;
 		}
@@ -60,6 +64,7 @@ public class HalfEdge
 			hes.addVertex(midpoint);
 			midpoint.valency = 4;	// Is this a safe assumption?
 			midpoint.setToEdge();
+			midpoint.boundary = true;	// The mesh around the vertex is incomplete
 			
 			vertex = midpoint;
 			face = f2;
@@ -70,5 +75,10 @@ public class HalfEdge
 		
 		hes.addHalfEdge(e);
 		return e;
+	}
+	
+	public String toString()
+	{
+		return sym.vertex + " to " + vertex;
 	}
 }

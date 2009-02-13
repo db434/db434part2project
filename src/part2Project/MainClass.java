@@ -42,9 +42,13 @@ public class MainClass
 		double startTime = System.currentTimeMillis();
 		double endTime = startTime + arg.getRunTime()*1000;
 		
+		int numVertices = 0;
+		
 		//Do subdivision
 		while(stepsSoFar<arg.getNumSteps() && System.currentTimeMillis()<endTime)
-		{
+		{	
+			numVertices = hes.numVertices();
+			
 			hes.subdivide(arg.getDegree());			
 			stepsSoFar++;
 			
@@ -56,6 +60,12 @@ public class MainClass
 				System.out.println("Step " + stepsSoFar + ":\t\t" + timeTaken + "ms\n" +
 									hes.stats());
 			}			
+					
+			if(hes.numVertices() == numVertices)
+			{
+				System.out.println("No further division - stopping process.");
+				break;
+			}
 		}
 		
 		if(!arg.getOutputFile().equals(""))

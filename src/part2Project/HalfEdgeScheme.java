@@ -82,7 +82,6 @@ public class HalfEdgeScheme
 			Vertex v = e.vertex();
 			if(!v.contributed)
 			{
-				int valency = v.valency;
 				float alpha;
 				float beta;
 				float gamma;
@@ -99,14 +98,7 @@ public class HalfEdgeScheme
 					beta = self*neighbour;
 					gamma = neighbour*neighbour;
 				}
-				
-				if(false /*sometimes you don't want multipliers?*/)
-				{
-					alpha *= MainClass.readMult(1, valency);
-					beta *= MainClass.readMult(2, valency);
-					gamma *= MainClass.readMult(3, valency);
-				}
-								
+				//System.out.println(e);
 				v.contribute(e, alpha, beta, gamma, oddStep);
 			}			
 		}
