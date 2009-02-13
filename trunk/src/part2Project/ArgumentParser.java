@@ -36,7 +36,7 @@ public class ArgumentParser
 				printStats = true;
 				if(MainClass.debug) System.out.println("Stats will be printed");
 			}
-			else if(s.equals("stats"))
+			else if(s.equals("adaptive"))
 			{
 				adaptive = true;
 				if(MainClass.debug) System.out.println("Using adaptive algorithm");

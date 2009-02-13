@@ -16,6 +16,10 @@ public class Vertex
 	private boolean face = false;
 	public boolean contributed = false;
 	
+	public boolean fixed = false;	// Stop moving once an adjacent face stops dividing
+	public boolean boundary = false;	//This point is next to an undivided face, so the
+										//mesh is slightly unusual around it
+	
 	public Vertex(double x, double y, double z)
 	{
 		this.x = x;
@@ -63,14 +67,43 @@ public class Vertex
 		addContribution(this, self*MainClass.readMult(1, valency), oddStep);
 		
 		HalfEdge he = e;
-		do
+		for(int i=0; i<valency; i++)
 		{
-			Vertex n = he.sym().vertex();
-			Vertex d = he.sym().next().vertex();
-			addContribution(he.sym().vertex(), neighbour*MainClass.readMult(2, n.valency), oddStep);
-			addContribution(he.sym().next().vertex(), diagonal*MainClass.readMult(3, d.valency), oddStep);
+			if(he.face().fixed)	
+			{
+				// The face hasn't been divided: there aren't 
+				// enough points, so we need to make them temporarily
+				Vertex n1 = he.vertex();
+				Vertex d1 = he.next().midpoint();
+				Vertex d2 = he.next().next().next().midpoint();
+				Vertex n2 = Vertex.weightedAverage(d1, d2);
+				addContribution(n1, neighbour*MainClass.readMult(2, n1.valency), oddStep);
+				addContribution(n2, neighbour*MainClass.readMult(2, n2.valency), oddStep);
+				addContribution(d1, diagonal*MainClass.readMult(3, d1.valency), oddStep);
+				addContribution(d2, diagonal*MainClass.readMult(3, d2.valency), oddStep);
+				
+				he = he.sym();
+				i++;			// Did two contributions at once
+			}
+			else
+			{
+				Vertex n = he.sym().vertex();
+				Vertex d = he.sym().next().vertex();
+				addContribution(n, neighbour*MainClass.readMult(2, n.valency), oddStep);
+				addContribution(d, diagonal*MainClass.readMult(3, d.valency), oddStep);
+				
+				he = he.next().sym();
+			}
 		}
-		while(!(he = he.next().sym()).equals(e));
+		
+//		do
+//		{
+//			Vertex n = he.sym().vertex();
+//			Vertex d = he.sym().next().vertex();
+//			addContribution(he.sym().vertex(), neighbour*MainClass.readMult(2, n.valency), oddStep);
+//			addContribution(he.sym().next().vertex(), diagonal*MainClass.readMult(3, d.valency), oddStep);
+//		}
+//		while(!(he = he.next().sym()).equals(e));
 		
 		contributed = true;
 	}
@@ -96,6 +129,8 @@ public class Vertex
 	
 	private boolean shouldSmooth(boolean oddStep)
 	{
+		if(fixed) return false;
+		
 		boolean result;
 		
 		if(oddStep) result = old || edge;
@@ -123,6 +158,7 @@ public class Vertex
 	// e is facing the vertex
 	public void valency3Smooth(HalfEdge e, double rho)
 	{
+		if(fixed) return;
 		if(valency == 3)
 		{
 			double delta = MainClass.readMult(4, 3);
