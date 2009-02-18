@@ -75,8 +75,10 @@ public class Vertex
 				// enough points, so we need to make them temporarily
 				Vertex n1 = he.vertex();
 				Vertex d1 = he.next().midpoint();
-				Vertex d2 = he.next().next().next().midpoint();
-				Vertex n2 = Vertex.weightedAverage(d1, d2);
+				Vertex n2 = he.face().midpoint();
+				Vertex d2 = he.next().next().next().midpoint();	
+				d1.setToEdge(); d2.setToEdge(); n2.setToFace();
+				
 				addContribution(n1, neighbour*MainClass.readMult(2, n1.valency), oddStep);
 				addContribution(n2, neighbour*MainClass.readMult(2, n2.valency), oddStep);
 				addContribution(d1, diagonal*MainClass.readMult(3, d1.valency), oddStep);

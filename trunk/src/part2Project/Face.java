@@ -8,9 +8,12 @@ public class Face
 	private int divLevel = 0;					// Some faces may be divided different
 	public boolean fixed = false;				// amounts to their neighbours
 	
+	public boolean printed = false;		// Says if this face has been printed to the file
+	public static int numFaces = 0;		// Faces may get split oddly when printing them
+	
 	private enum DivideBy {SIZE, CURVATURE, BOTH};
 	private static DivideBy divReason = DivideBy.SIZE;
-	private static double minDistance = 0.1;	// Update after testing
+	private static double minDistance = 0.05;	// Update after testing
 	private static double minCurvature = 0;		// Update after testing
 	
 	
@@ -22,6 +25,12 @@ public class Face
 	public Face(Vector<Vertex> v)
 	{
 		vertices = v;
+	}
+	
+	public Vertex midpoint()
+	{
+		return Vertex.weightedAverage(vertices.get(0), vertices.get(1),
+									  vertices.get(2), vertices.get(3));
 	}
 	
 	// Takes one of the Face's edges, and then splits the face into four sub-faces
@@ -53,8 +62,7 @@ public class Face
 		
 		// x1 now point to the midpoints of edges, and x2 point to corners
 		
-		Vertex centre = Vertex.weightedAverage(w2.vertex(), s2.vertex(),
-											   e2.vertex(), n2.vertex());
+		Vertex centre = midpoint();
 		hes.addVertex(centre);
 		centre.valency = 4;
 		centre.setToFace();
@@ -125,7 +133,7 @@ public class Face
 			}
 			
 			if(!divide) fixed = true;
-			//if(!divide) fixPoints();	//Don't want the vertices to move any more
+			if(!divide) fixPoints();	//Don't want the vertices to move any more
 		}
 		
 		return divide;
@@ -157,6 +165,8 @@ public class Face
 	
 	public String toString()
 	{
+		numFaces++;
+		
 		String s = String.valueOf(vertices.size());
 		for(Vertex v : vertices) s += " " + v.getIndex();
 		
@@ -215,128 +225,143 @@ public class Face
 		{
 			case(0):		// Extra points: none
 			{
-				s = "4 "+c1+" "+c2+" "+c3+" "+c4;
+				s = noExtra(c1, c2, c3, c4);
 				break;
 			}
 			case(1):		// Extra points: s41
 			{
-				s = "3 "+s41+" "+c1+" "+c2+"\n" +
-					"3 "+s41+" "+c2+" "+c3+"\n" +
-					"3 "+s41+" "+c3+" "+c4;
+				s = oneExtra(c1,c2,c3,c4,s41);
 				break;
 			}
 			case(2):		// Extra points: s12
 			{
-				s = "3 "+s12+" "+c4+" "+c1+"\n" +
-					"3 "+s12+" "+c2+" "+c3+"\n" +
-					"3 "+s12+" "+c3+" "+c4;
+				s = oneExtra(c2,c3,c4,c1,s12);
 				break;
 			}
 			case(3):		// Extra points: s41 s12
 			{
-				s = "3 "+s41+" "+c1+" "+s12+"\n" +
-					"3 "+s41+" "+s12+" "+c3+"\n" +
-					"3 "+s12+" "+c2+" "+c3+"\n" +
-					"3 "+s41+" "+c3+" "+c4;
+				s = twoExtraAdj(c1,s12,c2,c3,c4,s41);
 				break;
 			}
 			case(4):		// Extra points: s23
 			{
-				s = "3 "+s23+" "+c1+" "+c2+"\n" +
-					"3 "+s23+" "+c3+" "+c4+"\n" +
-					"3 "+s23+" "+c4+" "+c1;
+				s = oneExtra(c3,c4,c1,c2,s23);
 				break;
 			}
 			case(5):		// Extra points: s41 s23
 			{
-				s = "4 "+s41+" "+c1+" "+c2+" "+s23+"\n" +
-					"4 "+s23+" "+c3+" "+c4+" "+s41;
+				s = twoExtraOpp(c1,c2,s23,c3,c4,s41);
 				break;
 			}
 			case(6):		// Extra points: s12 s23
 			{
-				s = "3 "+s12+" "+c2+" "+s23+"\n" +
-					"3 "+s12+" "+s23+" "+c4+"\n" +
-					"3 "+s23+" "+c3+" "+c4+"\n" +
-					"3 "+s12+" "+c4+" "+c1;
+				s = twoExtraAdj(c2,s23,c3,c4,c1,s12);
 				break;
 			}
 			case(7):		// Extra points: s41 s12 s23
 			{
-				s = "3 "+s12+" "+c2+" "+s23+"\n" +
-					"3 "+s12+" "+s23+" "+c3+"\n" +
-					"3 "+s12+" "+c3+" "+c4+"\n" +
-					"3 "+s12+" "+c4+" "+s41+"\n" +
-					"3 "+s12+" "+s41+" "+c1;
+				s = threeExtra(c1,s12,c2,s23,c3,c4,s41);
 				break;
 			}
 			case(8):		// Extra points: s34
 			{
-				s = "3 "+s34+" "+c1+" "+c2+"\n" +
-					"3 "+s34+" "+c2+" "+c3+"\n" +
-					"3 "+s34+" "+c4+" "+c1;
+				s = oneExtra(c4,c1,c2,c3,s34);
 				break;
 			}
 			case(9):		// Extra points: s41 s34
 			{
-				s = "3 "+s34+" "+c4+" "+s41+"\n" +
-					"3 "+s34+" "+s41+" "+c2+"\n" +
-					"3 "+s41+" "+c1+" "+c2+"\n" +
-					"3 "+s34+" "+c2+" "+c3;
+				s = twoExtraAdj(c4,s41,c1,c2,c3,s34);
 				break;
 			}
 			case(10):		// Extra points: s12 s34
 			{
-				s = "4 "+s12+" "+c2+" "+c3+" "+s34+"\n" +
-					"4 "+s34+" "+c4+" "+c1+" "+s12;
+				s = twoExtraOpp(c2,c3,s34,c4,c1,s12);
 				break;
 			}
 			case(11):		// Extra points: s41 s12 s34
 			{
-				s = "3 "+s41+" "+c1+" "+s12+"\n" +
-					"3 "+s41+" "+s12+" "+c2+"\n" +
-					"3 "+s41+" "+c2+" "+c3+"\n" +
-					"3 "+s41+" "+c3+" "+s34+"\n" +
-					"3 "+s41+" "+s34+" "+c4;
+				s = threeExtra(c4,s41,c1,s12,c2,c3,s34);
 				break;
 			}
 			case(12):		// Extra points: s23 s34
 			{
-				s = "3 "+s23+" "+c3+" "+s34+"\n" +
-					"3 "+s23+" "+s34+" "+c1+"\n" +
-					"3 "+s34+" "+c4+" "+c1+"\n" +
-					"3 "+s23+" "+c1+" "+c2;
+				s = twoExtraAdj(c3,s34,c4,c1,c2,s23);
 				break;
 			}
 			case(13):		// Extra points: s41 s23 s34
 			{
-				s = "3 "+s34+" "+c4+" "+s41+"\n" +
-					"3 "+s34+" "+s41+" "+c1+"\n" +
-					"3 "+s34+" "+c1+" "+c2+"\n" +
-					"3 "+s34+" "+c2+" "+s23+"\n" +
-					"3 "+s34+" "+s23+" "+c3;
+				s = threeExtra(c3,s34,c4,s41,c1,c2,s23);
 				break;
 			}
 			case(14):		// Extra points: s12 s23 s34
 			{
-				s = "3 "+s23+" "+c3+" "+s34+"\n" +
-					"3 "+s23+" "+s34+" "+c4+"\n" +
-					"3 "+s23+" "+c4+" "+c1+"\n" +
-					"3 "+s23+" "+c1+" "+s12+"\n" +
-					"3 "+s23+" "+s12+" "+c2;
+				s = threeExtra(c2,s23,c3,s34,c4,c1,s12);
 				break;
 			}
 			case(15):		// Extra points: s41 s12 s23 s34
 			{
-				s = "3 "+s12+" "+c2+" "+s23+"\n" +
-					"3 "+s23+" "+c3+" "+s34+"\n" +
-					"3 "+s34+" "+c4+" "+s41+"\n" +
-					"3 "+s41+" "+c1+" "+s12+"\n" +
-					"4 "+s12+" "+s23+" "+s34+" "+s41;
+				s = fourExtra(c1,s12,c2,s23,c3,s34,c4,s41);
 				break;
 			}
 		}
 		
 		return s;
 	}
+	
+	/* 
+	 * Printing methods.
+	 * Take indices of vertices, and print tessellated polygons.
+	 * Indices must be given in clockwise order.
+	 */
+	
+	private String noExtra(int v1, int v2, int v3, int v4)
+	{
+		numFaces += 1;
+		return 	"4 "+v1+" "+v2+" "+v3+" "+v4;
+	}
+	
+	private String oneExtra(int v1, int v2, int v3, int v4, int e1)
+	{
+		numFaces += 3;
+		return 	"3 "+e1+" "+v1+" "+v2+"\n" +
+				"3 "+e1+" "+v2+" "+v3+"\n" +
+				"3 "+e1+" "+v3+" "+v4;
+	}
+	
+	private String twoExtraAdj(int v1, int e1, int v2, int v3, int v4, int e2)
+	{
+		numFaces += 4;
+		return 	"3 "+e2+" "+v1+" "+e1+"\n" +
+				"3 "+e2+" "+e1+" "+v3+"\n" +
+				"3 "+e1+" "+v2+" "+v3+"\n" +
+				"3 "+e2+" "+v3+" "+v4;
+	}
+	
+	private String twoExtraOpp(int v1, int v2, int e1, int v3, int v4, int e2)
+	{
+		numFaces += 2;
+		return 	"4 "+e1+" "+e2+" "+v1+" "+v2+"\n" +
+				"4 "+e1+" "+v3+" "+v4+" "+e2;
+	}
+	
+	private String threeExtra(int v1, int e1, int v2, int e2, int v3, int v4, int e3)
+	{
+		numFaces += 5;
+		return 	"3 "+e1+" "+v2+" "+e2+"\n" +
+				"3 "+e1+" "+e2+" "+v3+"\n" +
+				"3 "+e1+" "+v3+" "+v4+"\n" +
+				"3 "+e1+" "+v4+" "+e3+"\n" +
+				"3 "+e1+" "+e3+" "+v1;
+	}
+	
+	private String fourExtra(int v1, int e1, int v2, int e2, int v3, int e3, int v4, int e4)
+	{
+		numFaces += 5;
+		return 	"3 "+e1+" "+v2+" "+e2+"\n" +
+				"3 "+e2+" "+v3+" "+e3+"\n" +
+				"3 "+e3+" "+v4+" "+e4+"\n" +
+				"3 "+e4+" "+v1+" "+e1+"\n" +
+				"4 "+e1+" "+e2+" "+e3+" "+e4;
+	}
+	
 }
