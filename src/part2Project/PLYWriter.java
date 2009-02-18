@@ -7,21 +7,36 @@ public class PLYWriter
 	public static void writeFile(ArgumentParser arg, HalfEdgeScheme hes) throws Exception
 	{
 		int vertices = hes.numVertices();
-		int faces = hes.numFaces();
+		int edges = hes.numEdges();
 		
-		BufferedWriter out = new BufferedWriter(new FileWriter(arg.getOutputFile()));
+		StringBuffer b = new StringBuffer("");
 		
-		out.write(header(vertices, faces, arg));
 		
 		for(int i=0; i<vertices; i++)
 		{
-			out.write(hes.getVertex(i).toString() + "\n");
+			b.append(hes.getVertex(i).toString() + "\n");
 		}
 		
-		for(int i=0; i<faces; i++)
+		for(int i=0; i<edges; i++)
 		{
-			out.write(hes.getFace(i).toString() + "\n");
+			HalfEdge e = hes.getHalfEdge(i);
+			if(!e.face().printed)
+			{
+				b.append(e.face().toString(e) + "\n");
+				e.face().printed = true;
+			}
 		}
+		
+//		for(int i=0; i<faces; i++)
+//		{
+//			out.write(hes.getFace(i).toString() + "\n");
+//		}
+		
+		BufferedWriter out = new BufferedWriter(new FileWriter(arg.getOutputFile()));
+		
+		int faces = Face.numFaces;
+		out.write(header(vertices, faces, arg));
+		out.write(b.toString());
 		
 		out.close();
 	}
