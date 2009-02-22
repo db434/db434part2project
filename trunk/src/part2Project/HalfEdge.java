@@ -30,8 +30,6 @@ public class HalfEdge
 		//else e = next.sym.next.sym.next.next;
 		e = rotate().next;
 		
-		if(vertex.boundary) System.out.println("hi");
-		
 		return e;
 	}
 	
@@ -42,10 +40,10 @@ public class HalfEdge
 		
 		if(vertex.equals(next.sym.vertex)) e = next.sym;
 		else if(vertex.equals(next.sym.sym.vertex)) e = next.sym.sym;
-		else e = next.sym.next.sym.next;//ahead();		// If there has been some extra subdivision
+		else e = next.sym.next.sym.next;		// If there has been some extra subdivision
 		
 		boolean test = vertex.equals(e.vertex);
-		if(!test) System.out.println("hi");
+		if(!test) System.out.println("Something went wrong with rotation.");
 		
 		return e;
 	}
@@ -101,6 +99,21 @@ public class HalfEdge
 		
 		hes.addHalfEdge(e);
 		return e;
+	}
+	
+	public static double angleBetween(HalfEdge e1, HalfEdge e2)
+	{
+		Vertex v1s = e1.sym.vertex, v1e = e1.vertex;
+		Vertex v2s = e2.sym.vertex, v2e = e1.vertex;
+		
+		double dotProduct = (v1e.getX() - v1s.getX()) * (v2e.getX() - v2s.getX()) +
+							(v1e.getY() - v1s.getY()) * (v2e.getY() - v2s.getY()) +
+							(v1e.getZ() - v1s.getZ()) * (v2e.getZ() - v2s.getZ());
+		
+		double area = Vertex.distBetween(v1s, v1e) * Vertex.distBetween(v2s, v2e);
+		
+		double angle = Math.acos(dotProduct/area);
+		return angle;
 	}
 	
 	public String toString()

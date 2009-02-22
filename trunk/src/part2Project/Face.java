@@ -12,9 +12,9 @@ public class Face
 	public static int numFaces = 0;		// Faces may get split oddly when printing them
 	
 	private enum DivideBy {SIZE, CURVATURE, BOTH};
-	private static DivideBy divReason = DivideBy.SIZE;
-	private static double minDistance = 0.05;	// Update after testing
-	private static double minCurvature = 0;		// Update after testing
+	private static DivideBy divReason = DivideBy.CURVATURE;
+	private static double minDistance = 0.07;	// Update after testing
+	private static double maxCurvature = 0.001;		// Update after testing
 	
 	
 	public Face()
@@ -40,7 +40,7 @@ public class Face
 		{
 			MainClass.fatalException(new Exception("Face split from invalid edge."));
 		}
-		else if(shouldDivide())
+		else if(shouldDivide(e))
 		{
 			defSplit(e, hes);
 		}
@@ -112,7 +112,7 @@ public class Face
 		h1.setNext(h2); h2.setNext(h3); h3.setNext(h4); h4.setNext(h1);
 	}
 	
-	private boolean shouldDivide()
+	private boolean shouldDivide(HalfEdge e)
 	{
 		boolean divide = true;
 		
@@ -129,11 +129,24 @@ public class Face
 			// Could check how flat the polygon is
 			if((divReason == DivideBy.CURVATURE) || (divReason == DivideBy.BOTH))
 			{
-				divide = divide && (minCurvature > 0);
+				HalfEdge he = e;
+				double maxCurv = 0;
+				
+				for(int i=0; i<vertices.size(); i++)
+				{
+					double curv = Math.abs(he.vertex().calcCurvature(he));
+					if(curv > maxCurv) maxCurv = curv;
+					he = he.next();
+				}
+				
+				divide = divide && (maxCurv > maxCurvature);
 			}
 			
-			if(!divide) fixed = true;
-			if(!divide) fixPoints();	//Don't want the vertices to move any more
+			if(!divide)
+			{
+				fixed = true;
+				fixPoints();	//Don't want the vertices to move any more
+			}
 		}
 		
 		return divide;
@@ -163,7 +176,7 @@ public class Face
 	
 	private void fixPoints()
 	{
-		for(Vertex v : vertices) v.fixed = true;
+		for(Vertex v : vertices) v.fix();
 	}
 	
 	public String toString()
