@@ -9,6 +9,7 @@ public class Vertex
 	static int numVertices = 0;
 	private int index;
 	public int valency = 0;
+	private double curvature = 100;
 	
 	// Determines whether a vertex should contribute or be smoothed
 	private boolean old = false;
@@ -16,7 +17,8 @@ public class Vertex
 	private boolean face = false;
 	public boolean contributed = false;
 	
-	public boolean fixed = false;	// Stop moving once an adjacent face stops dividing
+	private int numFixedFaces = 0;
+	private boolean fixed = false;		// Stop moving once all adjacent faces stop dividing
 	public boolean boundary = false;	//This point is next to an undivided face, so the
 										//mesh is slightly unusual around it
 	
@@ -78,7 +80,7 @@ public class Vertex
 		HalfEdge he = e;
 		for(int i=0; i<valency; i++)
 		{
-			if(he.sym().vertex().equals(this))//(he.face().fixed && !he.vertex().equals(this))	
+			if(he.sym().vertex().equals(this))	// A special case to deal with boundary vertices
 			{
 				// The face hasn't been divided: there aren't 
 				// enough points, so we need to make them temporarily
@@ -92,14 +94,26 @@ public class Vertex
 				addContribution(n2, neighbour*MainClass.readMult(2, n2.valency), oddStep);
 				addContribution(d1, diagonal*MainClass.readMult(3, d1.valency), oddStep);
 				addContribution(d2, diagonal*MainClass.readMult(3, d2.valency), oddStep);
-				if(boundary) System.out.println("f");
+				
 				he = he.sym();
 				i++;			// Did two contributions at once
 			}
 			else
-			{if(boundary) System.out.println("g");
-				Vertex n = he.sym().vertex();
-				Vertex d = he.sym().next().vertex();
+			{
+				Vertex n, d;
+				
+				if(he.sym().face().fixed)
+				{
+					n = he.sym().midpoint();
+					d = he.sym().face().midpoint();
+					numVertices -= 2;	// These vertices are only temporary
+				}
+				else
+				{
+					n = he.sym().vertex();
+					d = he.sym().next().vertex();
+				}
+				
 				addContribution(n, neighbour*MainClass.readMult(2, n.valency), oddStep);
 				addContribution(d, diagonal*MainClass.readMult(3, d.valency), oddStep);
 				
@@ -188,6 +202,51 @@ public class Vertex
 		}
 	}
 	
+	// Determines if this vertex should stop being smoothed because it is surrounded
+	// by faces which have already been fixed in position
+	public void fix()
+	{
+		if(fixed) return;		// Already fixed - don't need to check
+		
+		numFixedFaces++;
+		
+		// If this is a boundary vertex, it has less adjacent faces
+		fixed = boundary ? (numFixedFaces >= valency-2) : (numFixedFaces >= valency);
+	}
+	
+	// Calculates the discrete curvature around the vertex
+	public double calcCurvature(HalfEdge e)
+	{
+		HalfEdge he = e;
+		
+		if(boundary)
+		{
+			curvature = Math.PI;
+			for(int i=0; i<valency; i++)
+			{
+				curvature -= HalfEdge.angleBetween(he, he.next().sym());
+				he = he.next().sym();
+				
+				if(!he.vertex().equals(this))
+				{
+					he = he.sym();		// Skip over odd parts of the mesh
+					i += 2;
+				}
+			}
+		}
+		else
+		{
+			curvature = Math.PI * 2;
+			for(int i=0; i<valency; i++)
+			{
+				curvature -= HalfEdge.angleBetween(he, he.rotate());
+				he = he.rotate();
+			}
+		}
+		
+		return curvature;
+	}
+	
 	// Takes into account the valencies/multipliers of the vertices
 	public static Vertex weightedAverage(Vertex v1, Vertex v2)
 	{
@@ -195,8 +254,8 @@ public class Vertex
 		double mult2 = MainClass.readMult(2, v2.valency);
 		
 		Vertex v = new Vertex((v1.x*mult1 + v2.x*mult2)/(mult1 + mult2),
-						  (v1.y*mult1 + v2.y*mult2)/(mult1 + mult2),
-						  (v1.z*mult1 + v2.z*mult2)/(mult1 + mult2));
+						  	  (v1.y*mult1 + v2.y*mult2)/(mult1 + mult2),
+						  	  (v1.z*mult1 + v2.z*mult2)/(mult1 + mult2));
 		
 		v.setToEdge();		// Is this safe?
 		v.valency = 4;		// Is this safe?
@@ -214,8 +273,8 @@ public class Vertex
 		double total = mult1 + mult2 + mult3 + mult4;
 		
 		Vertex v = new Vertex((v1.x*mult1 + v2.x*mult2 + v3.x*mult3 + v4.x*mult4)/total,
-						  (v1.y*mult1 + v2.y*mult2 + v3.y*mult3 + v4.y*mult4)/total,
-						  (v1.z*mult1 + v2.z*mult2 + v3.z*mult3 + v4.z*mult4)/total);
+						  	  (v1.y*mult1 + v2.y*mult2 + v3.y*mult3 + v4.y*mult4)/total,
+						  	  (v1.z*mult1 + v2.z*mult2 + v3.z*mult3 + v4.z*mult4)/total);
 		
 		v.setToFace();
 		v.valency = 4;		// Is this safe?
@@ -263,6 +322,7 @@ public class Vertex
 	
 	public String toString()
 	{
-		return new String(x + " " + y + " " + z);
+		String s = String.format("%f %f %f", x, y, z);
+		return s;
 	}
 }

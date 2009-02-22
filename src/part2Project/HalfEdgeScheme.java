@@ -49,7 +49,7 @@ public class HalfEdgeScheme
 	
 	public void subdivide(int degree)
 	{
-		refine();
+		refine();		
 		for(int step=1; step<=(degree/2); step++) smooth(degree, step);
 		valency3Smooth();
 		
