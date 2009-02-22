@@ -29,6 +29,14 @@ public class Vertex
 		index = numVertices++;
 	}
 	
+	// Create a new Vertex without altering the numVertices value
+	public static Vertex tempVert(double x, double y, double z)
+	{
+		Vertex v = new Vertex(x,y,z);
+		numVertices--;
+		return v;
+	}
+	
 	public double getX() {return x;}
 	public double getY() {return y;}
 	public double getZ() {return z;}
@@ -62,6 +70,7 @@ public class Vertex
 	}
 	
 	// Get contributions from all surrounding vertices
+	// e points to this vertex
 	public void contribute(HalfEdge e, float self, float neighbour, float diagonal, boolean oddStep)
 	{
 		addContribution(this, self*MainClass.readMult(1, valency), oddStep);
@@ -69,43 +78,34 @@ public class Vertex
 		HalfEdge he = e;
 		for(int i=0; i<valency; i++)
 		{
-			if(he.face().fixed)	
+			if(he.sym().vertex().equals(this))//(he.face().fixed && !he.vertex().equals(this))	
 			{
 				// The face hasn't been divided: there aren't 
 				// enough points, so we need to make them temporarily
-				Vertex n1 = he.vertex();
+				Vertex n1 = he.next().next().next().vertex();
 				Vertex d1 = he.next().midpoint();
 				Vertex n2 = he.face().midpoint();
-				Vertex d2 = he.next().next().next().midpoint();	
-				d1.setToEdge(); d2.setToEdge(); n2.setToFace();
+				Vertex d2 = he.next().next().next().midpoint();
+				numVertices -= 3;	// Created three vertices which shouldn't alter the count
 				
 				addContribution(n1, neighbour*MainClass.readMult(2, n1.valency), oddStep);
 				addContribution(n2, neighbour*MainClass.readMult(2, n2.valency), oddStep);
 				addContribution(d1, diagonal*MainClass.readMult(3, d1.valency), oddStep);
 				addContribution(d2, diagonal*MainClass.readMult(3, d2.valency), oddStep);
-				
+				if(boundary) System.out.println("f");
 				he = he.sym();
 				i++;			// Did two contributions at once
 			}
 			else
-			{
+			{if(boundary) System.out.println("g");
 				Vertex n = he.sym().vertex();
 				Vertex d = he.sym().next().vertex();
 				addContribution(n, neighbour*MainClass.readMult(2, n.valency), oddStep);
 				addContribution(d, diagonal*MainClass.readMult(3, d.valency), oddStep);
 				
-				he = he.next().sym();
+				he = he.next().sym();	// Rotate around this vertex
 			}
 		}
-		
-//		do
-//		{
-//			Vertex n = he.sym().vertex();
-//			Vertex d = he.sym().next().vertex();
-//			addContribution(he.sym().vertex(), neighbour*MainClass.readMult(2, n.valency), oddStep);
-//			addContribution(he.sym().next().vertex(), diagonal*MainClass.readMult(3, d.valency), oddStep);
-//		}
-//		while(!(he = he.next().sym()).equals(e));
 		
 		contributed = true;
 	}
@@ -183,7 +183,7 @@ public class Vertex
 				if(v.old) 	defContribute(he2.next().vertex(), diagonal);
 				else		defContribute(he2.ahead().next().ahead().vertex(), diagonal);
 								
-				he = he.next().sym();
+				he = he.rotate();
 			}
 		}
 	}
@@ -194,9 +194,14 @@ public class Vertex
 		double mult1 = MainClass.readMult(2, v1.valency);
 		double mult2 = MainClass.readMult(2, v2.valency);
 		
-		return new Vertex((v1.x*mult1 + v2.x*mult2)/(mult1 + mult2),
+		Vertex v = new Vertex((v1.x*mult1 + v2.x*mult2)/(mult1 + mult2),
 						  (v1.y*mult1 + v2.y*mult2)/(mult1 + mult2),
 						  (v1.z*mult1 + v2.z*mult2)/(mult1 + mult2));
+		
+		v.setToEdge();		// Is this safe?
+		v.valency = 4;		// Is this safe?
+		
+		return v;
 	}
 	
 	// For vertices created in the centre of faces
@@ -208,9 +213,14 @@ public class Vertex
 		double mult4 = MainClass.readMult(3, v4.valency);
 		double total = mult1 + mult2 + mult3 + mult4;
 		
-		return new Vertex((v1.x*mult1 + v2.x*mult2 + v3.x*mult3 + v4.x*mult4)/total,
+		Vertex v = new Vertex((v1.x*mult1 + v2.x*mult2 + v3.x*mult3 + v4.x*mult4)/total,
 						  (v1.y*mult1 + v2.y*mult2 + v3.y*mult3 + v4.y*mult4)/total,
 						  (v1.z*mult1 + v2.z*mult2 + v3.z*mult3 + v4.z*mult4)/total);
+		
+		v.setToFace();
+		v.valency = 4;		// Is this safe?
+		
+		return v;
 	}
 	
 	public static double distBetween(Vertex v1, Vertex v2)
