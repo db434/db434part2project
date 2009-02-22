@@ -151,8 +151,11 @@ public class Face
 			Face neighbour = he.sym().face();
 			if(neighbour.divLevel < divLevel) neighbour.defSplit(he.sym(), hes);
 			
-			Face diagonal = he.ahead().sym().face();
-			if(diagonal.divLevel < divLevel) diagonal.defSplit(he.ahead().sym(), hes);
+			if(!he.vertex().boundary)	// If there is a diagonal face...
+			{
+				Face diagonal = he.ahead().sym().face();
+				if((diagonal.divLevel < divLevel)) diagonal.defSplit(he.ahead().sym(), hes);
+			}
 			
 			he = he.next();
 		}

@@ -22,7 +22,33 @@ public class HalfEdge
 	public Face face()	   	{return face;}
 	
 	// The next HalfEdge in a straight line (not valid around extraordinary points)
-	public HalfEdge ahead()	{return next.sym.next;}
+	public HalfEdge ahead()
+	{
+		HalfEdge e;
+		
+		//if(vertex.equals(next.sym.vertex)) e = next.sym.next;
+		//else e = next.sym.next.sym.next.next;
+		e = rotate().next;
+		
+		if(vertex.boundary) System.out.println("hi");
+		
+		return e;
+	}
+	
+	// Returns the next HalfEdge which points to the same Vertex
+	public HalfEdge rotate()
+	{
+		HalfEdge e;
+		
+		if(vertex.equals(next.sym.vertex)) e = next.sym;
+		else if(vertex.equals(next.sym.sym.vertex)) e = next.sym.sym;
+		else e = next.sym.next.sym.next;//ahead();		// If there has been some extra subdivision
+		
+		boolean test = vertex.equals(e.vertex);
+		if(!test) System.out.println("hi");
+		
+		return e;
+	}
 	
 	public void setSym(HalfEdge h)  {sym = h;}
 	public void setNext(HalfEdge h) {next = h;}
@@ -50,7 +76,7 @@ public class HalfEdge
 			e.sym = sym;
 			sym.sym = e;
 			
-			vertex = sym.vertex;	// Update to the midpoint
+			vertex = sym.vertex;		// Update to the midpoint
 			vertex.boundary = false;	// The mesh is now complete around vertex
 			
 			sym = sym.ahead();
@@ -62,7 +88,7 @@ public class HalfEdge
 			
 			Vertex midpoint = midpoint();
 			hes.addVertex(midpoint);
-			midpoint.valency = 4;	// Is this a safe assumption?
+			midpoint.valency = 4;		// Is this a safe assumption?
 			midpoint.setToEdge();
 			midpoint.boundary = true;	// The mesh around the vertex is incomplete
 			
