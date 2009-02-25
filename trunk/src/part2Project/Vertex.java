@@ -1,5 +1,7 @@
 package part2Project;
 
+import java.util.*;
+
 public class Vertex
 {
 	private double x,y,z;
@@ -214,7 +216,8 @@ public class Vertex
 		fixed = boundary ? (numFixedFaces >= valency-2) : (numFixedFaces >= valency);
 	}
 	
-	// Calculates the discrete curvature around the vertex
+	// Calculates the discrete curvature around the vertex, defined as:
+	// 360 - sum of all face angles
 	public double calcCurvature(HalfEdge e)
 	{
 		HalfEdge he = e;
@@ -233,15 +236,23 @@ public class Vertex
 					i += 2;
 				}
 			}
+			curvature *= 2;	// Only had data for 180 degrees, not 360
 		}
 		else
 		{
+			Vector<HalfEdge> edges = new Vector<HalfEdge>();
 			curvature = Math.PI * 2;
 			for(int i=0; i<valency; i++)
 			{
+				edges.add(he);
 				curvature -= HalfEdge.angleBetween(he, he.rotate());
 				he = he.rotate();
 			}
+//			for(int i=0; i<valency/2; i++)
+//			{
+//				curvature = Math.max(Math.abs(curvature),
+//									 Math.abs(Math.PI - HalfEdge.angleBetween(edges.get(i), edges.get(i + valency/2))));
+//			}
 		}
 		
 		return curvature;

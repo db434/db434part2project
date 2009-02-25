@@ -12,8 +12,8 @@ public class Face
 	public static int numFaces = 0;		// Faces may get split oddly when printing them
 	
 	private enum DivideBy {SIZE, CURVATURE, BOTH};
-	private static DivideBy divReason = DivideBy.CURVATURE;
-	private static double minDistance = 0.07;	// Update after testing
+	private static DivideBy divReason = DivideBy.BOTH;
+	private static double minDistance = 0.1;	// Update after testing
 	private static double maxCurvature = 0.001;		// Update after testing
 	
 	
@@ -31,6 +31,11 @@ public class Face
 	{
 		return Vertex.weightedAverage(vertices.get(0), vertices.get(1),
 									  vertices.get(2), vertices.get(3));
+	}
+	
+	public boolean divMoreThan(Face f)
+	{
+		return divLevel > f.divLevel;
 	}
 	
 	// Takes one of the Face's edges, and then splits the face into four sub-faces
@@ -64,8 +69,6 @@ public class Face
 		
 		Vertex centre = midpoint();
 		hes.addVertex(centre);
-		centre.valency = 4;
-		centre.setToFace();
 		
 		// Create all half-edges leading to and from the centre
 		HalfEdge CtoN = new HalfEdge(n1.vertex(), NW);
