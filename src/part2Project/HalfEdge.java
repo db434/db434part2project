@@ -24,13 +24,7 @@ public class HalfEdge
 	// The next HalfEdge in a straight line (not valid around extraordinary points)
 	public HalfEdge ahead()
 	{
-		HalfEdge e;
-		
-		//if(vertex.equals(next.sym.vertex)) e = next.sym.next;
-		//else e = next.sym.next.sym.next.next;
-		e = rotate().next;
-		
-		return e;
+		return rotate().next;
 	}
 	
 	// Returns the next HalfEdge which points to the same Vertex
@@ -38,12 +32,12 @@ public class HalfEdge
 	{
 		HalfEdge e;
 		
-		if(vertex.equals(next.sym.vertex)) e = next.sym;
-		else if(vertex.equals(next.sym.sym.vertex)) e = next.sym.sym;
+		if(vertex.equals(next.sym.vertex)) e = next.sym;	// Normal case
+		else if(vertex.equals(next.sym.sym.vertex)) e = next.sym.sym;	// If the face hasn't been divided
 		else e = next.sym.next.sym.next;		// If there has been some extra subdivision
 		
 		boolean test = vertex.equals(e.vertex);
-		if(!test) System.out.println("Something went wrong with rotation.");
+		if(!test) MainClass.fatalException(new Exception("Bad rotation"));
 		
 		return e;
 	}
@@ -69,7 +63,7 @@ public class HalfEdge
 	{
 		HalfEdge e = new HalfEdge(vertex, f1);
 		
-		if(sym.hasBeenSplit)
+		if(sym.face.divMoreThan(this.face))
 		{
 			e.sym = sym;
 			sym.sym = e;
