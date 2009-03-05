@@ -11,10 +11,12 @@ public class Face
 	public boolean printed = false;		// Says if this face has been printed to the file
 	public static int numFaces = 0;		// Faces may get split oddly when printing them
 	
+	private double[] normal = null;
+	
 	private enum DivideBy {SIZE, CURVATURE, BOTH};
-	private static DivideBy divReason = DivideBy.BOTH;
-	private static double minDistance = 0.1;	// Update after testing
-	private static double maxCurvature = 0.001;		// Update after testing
+	private static DivideBy divReason = DivideBy.CURVATURE;
+	private static double minDistance = 0.2;	// Update after testing
+	private static double maxCurvature = 0.1;		// Update after testing
 	
 	
 	public Face()
@@ -27,12 +29,49 @@ public class Face
 		vertices = v;
 	}
 	
+	public void reset()
+	{
+		normal = null;
+	}
+	
 	public Vertex midpoint()
 	{
 		return Vertex.weightedAverage(vertices.get(0), vertices.get(1),
 									  vertices.get(2), vertices.get(3));
 	}
 	
+	private double[] getNormal()
+	{
+		if(normal == null)
+		{
+			double[] v1 = Vertex.vectorBetween(vertices.get(0), vertices.get(1));
+			double[] v2 = Vertex.vectorBetween(vertices.get(0), vertices.get(2));
+			double[] v3 = Vertex.vectorBetween(vertices.get(0), vertices.get(3));			
+			normal = new double[3];
+			
+			// Take the cross products v1 x v2 and v1 x v3, and add them together
+			normal[0] = v2[2]*(v1[1] - v3[1]) + v2[1]*(v3[2] - v1[2]);
+			normal[1] = v2[0]*(v1[2] - v3[2]) + v2[2]*(v3[0] - v1[0]);
+			normal[2] = v2[1]*(v1[0] - v3[0]) + v2[0]*(v3[1] - v1[1]);
+		}
+		
+		return normal;
+	}
+	
+	private static double angleBetween(Face f1, Face f2)
+	{
+		double[] norm1 = f1.getNormal();
+		double[] norm2 = f2.getNormal();
+		
+		double dotProduct = norm1[0]*norm2[0] + norm1[1]*norm2[1] + norm1[2]*norm2[2];
+		double area = Math.sqrt(norm1[0]*norm1[0] + norm1[1]*norm1[1] + norm1[2]*norm1[2]) *
+					  Math.sqrt(norm2[0]*norm2[0] + norm2[1]*norm2[1] + norm2[2]*norm2[2]);
+		
+		double angle = Math.acos(dotProduct/area);
+		return angle;
+	}
+	
+	// Returns whether this face has been subdivided more than Face f
 	public boolean divMoreThan(Face f)
 	{
 		return divLevel > f.divLevel;
@@ -133,16 +172,16 @@ public class Face
 			if((divReason == DivideBy.CURVATURE) || (divReason == DivideBy.BOTH))
 			{
 				HalfEdge he = e;
-				double maxCurv = 0;
+				double curvature = 0;
 				
 				for(int i=0; i<vertices.size(); i++)
 				{
-					double curv = Math.abs(he.vertex().calcCurvature(he));
-					if(curv > maxCurv) maxCurv = curv;
+					double curv = Face.angleBetween(this, he.sym().face());
+					if(curv > curvature) curvature = curv;
 					he = he.next();
 				}
-				
-				divide = divide && (maxCurv > maxCurvature);
+				divide = divide && (curvature > maxCurvature);
+				//if(curvature < maxCurvature) System.out.println(curvature);
 			}
 			
 			if(!divide)

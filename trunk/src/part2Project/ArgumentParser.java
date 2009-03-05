@@ -2,7 +2,7 @@ package part2Project;
 
 public class ArgumentParser
 {
-	private int numSteps = 0;		//Default starting values or exceptions?
+	private int numSteps = Integer.MAX_VALUE;		//Default starting values or exceptions?
 	private int degree = 3;
 	private double runTime = Double.MAX_VALUE;
 	private boolean printStats = false;

@@ -302,6 +302,17 @@ public class Vertex
 		return Math.sqrt(dx*dx + dy*dy + dz*dz);
 	}
 	
+	public static double[] vectorBetween(Vertex v1, Vertex v2)
+	{
+		double[] vector = new double[3];
+		
+		vector[0] = v2.x - v1.x;
+		vector[1] = v2.y - v1.y;
+		vector[2] = v2.z - v1.z;
+		
+		return vector;
+	}
+	
 	// Returns the vertex's position in the vertex vector
 	public int getIndex()
 	{

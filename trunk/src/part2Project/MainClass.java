@@ -55,7 +55,7 @@ public class MainClass
 			if(arg.printStats())
 			{
 				double timeTaken = System.currentTimeMillis() - startTime;
-				startTime = System.currentTimeMillis();	// Time each cycle separately
+				//startTime = System.currentTimeMillis();	// Time each cycle separately
 				
 				System.out.println("Step " + stepsSoFar + ":\t\t" + timeTaken + "ms\n" +
 									hes.stats());
