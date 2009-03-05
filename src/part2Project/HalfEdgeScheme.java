@@ -136,6 +136,8 @@ public class HalfEdgeScheme
 			v.setToOld();
 			v.contributed = false;
 		}
+		for(Face f : faces) f.reset();
+		
 		rho = 1;
 	}
 	
