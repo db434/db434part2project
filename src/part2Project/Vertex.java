@@ -21,6 +21,7 @@ public class Vertex
 	
 	private int numFixedFaces = 0;
 	private boolean fixed = false;		// Stop moving once all adjacent faces stop dividing
+	private boolean tempSmooth = false;	// Undo the point being fixed for one subdivision step
 	public boolean boundary = false;	//This point is next to an undivided face, so the
 										//mesh is slightly unusual around it
 	
@@ -50,6 +51,15 @@ public class Vertex
 		this.x = x;
 		this.y = y;
 		this.z = z;
+	}
+	
+	// Prepare the vertex for a new subdivision step
+	public void reset()
+	{
+		setToOld();
+		contributed = false;
+		//curvature = 100;		// Remove this if using face angles
+		tempSmooth = false;
 	}
 	
 	// Decides if this vertex should contribute to v
@@ -147,7 +157,7 @@ public class Vertex
 	
 	private boolean shouldSmooth(boolean oddStep)
 	{
-		if(fixed) return false;
+		if(fixed && !tempSmooth) return false;
 		
 		boolean result;
 		
@@ -176,7 +186,7 @@ public class Vertex
 	// e is facing the vertex
 	public void valency3Smooth(HalfEdge e, double rho)
 	{
-		if(fixed) return;
+		if(fixed && !tempSmooth) return;
 		if(valency == 3)
 		{
 			double delta = MainClass.readMult(4, 3);
@@ -216,6 +226,13 @@ public class Vertex
 		fixed = boundary ? (numFixedFaces >= valency-2) : (numFixedFaces >= valency);
 	}
 	
+	// Sets tempSmooth to true. Used if a vertex's position is fixed, but it needs to
+	// smoothed again because of a forced face division.
+	public void tempSmooth()
+	{
+		tempSmooth = true;
+	}
+	
 	// Calculates the discrete curvature around the vertex, defined as:
 	// 360 - sum of all face angles
 	public double calcCurvature(HalfEdge e)
@@ -248,11 +265,6 @@ public class Vertex
 				curvature -= HalfEdge.angleBetween(he, he.rotate());
 				he = he.rotate();
 			}
-//			for(int i=0; i<valency/2; i++)
-//			{
-//				curvature = Math.max(Math.abs(curvature),
-//									 Math.abs(Math.PI - HalfEdge.angleBetween(edges.get(i), edges.get(i + valency/2))));
-//			}
 		}
 		
 		return curvature;
