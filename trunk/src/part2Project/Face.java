@@ -14,7 +14,7 @@ public class Face
 	private double[] normal = null;
 	
 	private enum DivideBy {SIZE, CURVATURE, BOTH};
-	private static DivideBy divReason = DivideBy.CURVATURE;
+	private static DivideBy divReason = DivideBy.BOTH;
 	private static double minDistance = 0.2;	// Update after testing
 	private static double maxCurvature = 0.1;		// Update after testing
 	
@@ -68,7 +68,7 @@ public class Face
 					  Math.sqrt(norm2[0]*norm2[0] + norm2[1]*norm2[1] + norm2[2]*norm2[2]);
 		
 		double angle = Math.acos(dotProduct/area);
-		return angle;
+		return Math.abs(angle);
 	}
 	
 	// Returns whether this face has been subdivided more than Face f
@@ -141,6 +141,8 @@ public class Face
 		// Update the number of times the faces have been divided
 		NW.divLevel = NE.divLevel = SW.divLevel = SE.divLevel = divLevel + 1;
 		NW.fixed = NE.fixed = SW.fixed = SE.fixed = fixed;
+		
+		if(fixed) smoothPointsOnce();	// Allow the points to move one more time
 	}
 	
 	private void recalculateVertices(HalfEdge h1, HalfEdge h2, HalfEdge h3, HalfEdge h4)
@@ -181,7 +183,6 @@ public class Face
 					he = he.next();
 				}
 				divide = divide && (curvature > maxCurvature);
-				//if(curvature < maxCurvature) System.out.println(curvature);
 			}
 			
 			if(!divide)
@@ -219,6 +220,11 @@ public class Face
 	private void fixPoints()
 	{
 		for(Vertex v : vertices) v.fix();
+	}
+	
+	private void smoothPointsOnce()
+	{
+		for(Vertex v : vertices) v.tempSmooth();
 	}
 	
 	public String toString()

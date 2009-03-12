@@ -131,11 +131,7 @@ public class HalfEdgeScheme
 	private void reset()
 	{
 		for(HalfEdge h : edges) h.hasBeenSplit = false;
-		for(Vertex v : vertices)
-		{
-			v.setToOld();
-			v.contributed = false;
-		}
+		for(Vertex v : vertices) v.reset();
 		for(Face f : faces) f.reset();
 		
 		rho = 1;
