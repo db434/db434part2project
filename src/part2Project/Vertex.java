@@ -114,22 +114,32 @@ public class Vertex
 			{
 				Vertex n, d;
 				
-				if(he.sym().face().fixed)
+				if(he.face().fixed)
 				{
-					n = he.sym().midpoint();
-					d = he.sym().face().midpoint();
-					numVertices -= 2;	// These vertices are only temporary
+					if(!he.sym().face().divMoreThan(he.face()))
+					{
+						n = he.midpoint();
+						d = he.face().midpoint();
+						numVertices -= 2;		// Used two temporary vertices
+					}
+					else
+					{
+						n = he.sym().vertex();
+						d = he.face().midpoint();
+						numVertices--;			// Used one temporary vertex
+					}
 				}
 				else
 				{
-					n = he.sym().vertex();
-					d = he.sym().next().vertex();
+					n = he.next().next().next().vertex();
+					d = he.next().next().vertex();
 				}
 				
 				addContribution(n, neighbour*MainClass.readMult(2, n.valency), oddStep);
 				addContribution(d, diagonal*MainClass.readMult(3, d.valency), oddStep);
 				
-				he = he.next().sym();	// Rotate around this vertex
+				if(boundary) he = he.next().sym();
+				else he = he.rotate();		// Rotate around this vertex
 			}
 		}
 		
