@@ -54,7 +54,19 @@ public class HalfEdge
 	
 	public Vertex midpoint()
 	{
-		return Vertex.weightedAverage(vertex, sym.vertex);
+		Vertex v;
+		
+		// Need to take care of vertex count now - may or may not create new vertex
+		/*if(sym.face.divMoreThan(face)) v = sym.vertex;
+		else*/ v = Vertex.weightedAverage(vertex, sym.vertex);
+		
+		return v;
+	}
+	
+	// Prepare the edge for a new subdivision step
+	public void reset()
+	{
+		hasBeenSplit = false;
 	}
 	
 	// Split this edge in two, returning the new half (this.ahead())

@@ -15,7 +15,7 @@ public class Face
 	
 	private enum DivideBy {SIZE, CURVATURE, BOTH};
 	private static DivideBy divReason = DivideBy.BOTH;
-	private static double minDistance = 0.2;	// Update after testing
+	private static double minDistance = 0.02;	// Update after testing
 	private static double maxCurvature = 0.1;		// Update after testing
 	
 	
@@ -29,6 +29,7 @@ public class Face
 		vertices = v;
 	}
 	
+	// Prepare the face for a new subdivision step
 	public void reset()
 	{
 		normal = null;

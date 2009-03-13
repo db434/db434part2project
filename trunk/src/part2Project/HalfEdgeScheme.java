@@ -130,7 +130,7 @@ public class HalfEdgeScheme
 	// Method to remove any temporary statuses, to prepare for the next subdivision step
 	private void reset()
 	{
-		for(HalfEdge h : edges) h.hasBeenSplit = false;
+		for(HalfEdge h : edges) h.reset();
 		for(Vertex v : vertices) v.reset();
 		for(Face f : faces) f.reset();
 		
