@@ -76,7 +76,7 @@ public class HalfEdgeScheme
 		
 		boolean oddStep = (step%2 == 1);
 		
-		// for all halfedges' vertices, make contributions
+		// For all halfedges' vertices, make contributions
 		for(HalfEdge e : edges)
 		{
 			Vertex v = e.vertex();
@@ -98,7 +98,7 @@ public class HalfEdgeScheme
 					beta = self*neighbour;
 					gamma = neighbour*neighbour;
 				}
-				//System.out.println(e);
+				
 				v.contribute(e, alpha, beta, gamma, oddStep);
 			}			
 		}
@@ -144,7 +144,7 @@ public class HalfEdgeScheme
 	
 	private void calculateWeights(int degree, int step)
 	{		
-		if(self == 0)
+		if(self == 0)	// If the weights haven't been calculated yet
 		{
 			float weight;
 			float d = degree;
@@ -162,7 +162,7 @@ public class HalfEdgeScheme
 			self = weight;
 			neighbour = (1-weight)/2;
 			
-			if((step%2) == 1)
+			if((step%2) == 1)	// Update rho: used for the final 3-valent smoothing stage
 			{
 				float alpha = self*self;
 				float beta = self*neighbour;
