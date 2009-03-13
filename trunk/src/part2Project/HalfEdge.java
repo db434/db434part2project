@@ -60,6 +60,9 @@ public class HalfEdge
 		/*if(sym.face.divMoreThan(face)) v = sym.vertex;
 		else*/ v = Vertex.weightedAverage(vertex, sym.vertex);
 		
+		v.setToEdge();
+		v.valency = 4;
+		
 		return v;
 	}
 	

@@ -37,8 +37,12 @@ public class Face
 	
 	public Vertex midpoint()
 	{
-		return Vertex.weightedAverage(vertices.get(0), vertices.get(1),
-									  vertices.get(2), vertices.get(3));
+		Vertex v = Vertex.weightedAverage(vertices.get(0), vertices.get(1),
+									  	  vertices.get(2), vertices.get(3));
+		v.setToFace();
+		v.valency = 4;
+		
+		return v;
 	}
 	
 	private double[] getNormal()
@@ -143,7 +147,12 @@ public class Face
 		NW.divLevel = NE.divLevel = SW.divLevel = SE.divLevel = divLevel + 1;
 		NW.fixed = NE.fixed = SW.fixed = SE.fixed = fixed;
 		
-		if(fixed) smoothPointsOnce();	// Allow the points to move one more time
+		if(fixed)	// Allow the points to move one more time
+		{
+			NW.fixPoints();	NE.fixPoints();	SW.fixPoints(); SE.fixPoints();
+			NW.smoothPointsOnce();	NE.smoothPointsOnce();
+			SW.smoothPointsOnce();	SE.smoothPointsOnce();
+		}
 	}
 	
 	private void recalculateVertices(HalfEdge h1, HalfEdge h2, HalfEdge h3, HalfEdge h4)
@@ -197,7 +206,7 @@ public class Face
 	}
 	
 	// Divide neighbouring faces if they have been divided less than this one, and
-	// this one is about to be divided again. Makes the maths work?
+	// this one is about to be divided again. Makes navigation easier.
 	// e is an edge of this face
 	private void checkNeighbours(HalfEdge e, HalfEdgeScheme hes)
 	{
