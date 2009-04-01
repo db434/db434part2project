@@ -149,6 +149,10 @@ public class Face
 		
 		if(fixed)	// Allow the points to move one more time
 		{
+			// Unfix old vertices so they are then fixed the correct number of times
+			w2.vertex().unfix();	s2.vertex().unfix();
+			e2.vertex().unfix();	n2.vertex().unfix();
+			
 			NW.fixPoints();	NE.fixPoints();	SW.fixPoints(); SE.fixPoints();
 			NW.smoothPointsOnce();	NE.smoothPointsOnce();
 			SW.smoothPointsOnce();	SE.smoothPointsOnce();
@@ -195,7 +199,7 @@ public class Face
 				divide = divide && (curvature > maxCurvature);
 			}
 			
-			if(!divide)
+			if(!divide && !fixed)
 			{
 				fixed = true;
 				fixPoints();	//Don't want the vertices to move any more

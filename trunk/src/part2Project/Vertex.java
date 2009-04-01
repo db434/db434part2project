@@ -236,6 +236,15 @@ public class Vertex
 		fixed = boundary ? (numFixedFaces >= valency-2) : (numFixedFaces >= valency);
 	}
 	
+	// Allows a decrease in the number of fixed faces - makes face splitting easier
+	public void unfix()
+	{
+		numFixedFaces--;
+		
+		// If this is a boundary vertex, it has less adjacent faces
+		fixed = boundary ? (numFixedFaces >= valency-2) : (numFixedFaces >= valency);
+	}
+	
 	// Sets tempSmooth to true. Used if a vertex's position is fixed, but it needs to
 	// smoothed again because of a forced face division.
 	public void tempSmooth()
