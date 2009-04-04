@@ -1,42 +1,38 @@
 package part2Project;
 
 import java.io.*;
+import java.util.Iterator;
 
 public class PLYWriter
 {
 	public static void writeFile(ArgumentParser arg, HalfEdgeScheme hes) throws Exception
 	{
 		int vertices = hes.numVertices();
-		int edges = hes.numEdges();
+		//int edges = hes.numEdges();
 		
-		StringBuffer b = new StringBuffer("");
+		StringBuffer f = new StringBuffer("");
 		
-		
-		for(int i=0; i<vertices; i++)
+		for(Iterator<HalfEdge> ie = hes.edgeIterator(); ie.hasNext(); )
 		{
-			b.append(hes.getVertex(i).toString() + "\n");
-		}
-		
-		for(int i=0; i<edges; i++)
-		{
-			HalfEdge e = hes.getHalfEdge(i);
+			HalfEdge e = ie.next();
 			if(!e.face().printed)
 			{
-				b.append(e.face().toString(e) + "\n");
+				f.append(e.face().toString(e) + "\n");
 				e.face().printed = true;
 			}
 		}
 		
-//		for(int i=0; i<faces; i++)
-//		{
-//			out.write(hes.getFace(i).toString() + "\n");
-//		}
+		BufferedWriter out = new BufferedWriter(new FileWriter(arg.getOutputFile()));		
 		
-		BufferedWriter out = new BufferedWriter(new FileWriter(arg.getOutputFile()));
+		int faces = Face.numFaces;					// Only know this after printing/tessellating the faces
+		out.write(header(vertices, faces, arg));	// So need to print faces before writing header
 		
-		int faces = Face.numFaces;
-		out.write(header(vertices, faces, arg));
-		out.write(b.toString());
+		for(Iterator<Vertex> iv = hes.vertexIterator(); iv.hasNext(); )
+		{
+			out.write(iv.next().toString() + "\n");
+		}		
+		
+		out.write(f.toString());
 		
 		out.close();
 	}

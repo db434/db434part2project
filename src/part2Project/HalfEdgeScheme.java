@@ -43,9 +43,13 @@ public class HalfEdgeScheme
 	public int numEdges()	 {return edges.size();}
 	public int numFaces()	 {return faces.size();}
 	
-	public Vertex getVertex(int index) 		{return vertices.get(index);}
-	public HalfEdge getHalfEdge(int index)  {return edges.get(index);}
-	public Face getFace(int index)	   		{return faces.get(index);}
+	//public Vertex getVertex(int index) 		{return vertices.get(index);}
+	//public HalfEdge getHalfEdge(int index)  {return edges.get(index);}
+	//public Face getFace(int index)	   		{return faces.get(index);}
+	
+	public Iterator<Vertex> vertexIterator()	{return vertices.iterator();}
+	public Iterator<HalfEdge> edgeIterator()	{return edges.iterator();}
+	public Iterator<Face> faceIterator()		{return faces.iterator();}
 	
 	public void subdivide(int degree)
 	{
