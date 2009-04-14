@@ -199,11 +199,15 @@ public class Face
 				divide = divide && (curvature > maxCurvature);
 			}
 			
-			if(!divide && !fixed)
+			if(!divide)
 			{
-				fixed = true;
 				fixEdges(e);
-				fixPoints();	//Don't want the vertices to move any more
+				
+				if(!fixed)
+				{
+					fixed = true;
+					fixPoints();	//Don't want the vertices to move any more
+				}
 			}
 		}
 		
