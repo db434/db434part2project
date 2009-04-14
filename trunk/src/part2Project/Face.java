@@ -14,9 +14,9 @@ public class Face
 	private double[] normal = null;
 	
 	private enum DivideBy {SIZE, CURVATURE, BOTH};
-	private static DivideBy divReason = DivideBy.BOTH;
-	private static double minDistance = 0.02;	// Update after testing
-	private static double maxCurvature = 0.1;		// Update after testing
+	private static DivideBy divReason = DivideBy.CURVATURE;
+	private static double minDistance = 0.308;		// Update after testing
+	private static double maxCurvature = 0.17;		// Update after testing
 	
 	
 	public Face()
@@ -202,6 +202,7 @@ public class Face
 			if(!divide && !fixed)
 			{
 				fixed = true;
+				fixEdges(e);
 				fixPoints();	//Don't want the vertices to move any more
 			}
 		}
@@ -234,6 +235,14 @@ public class Face
 	private void fixPoints()
 	{
 		for(Vertex v : vertices) v.fix();
+	}
+	
+	private void fixEdges(HalfEdge e)
+	{
+		e.hasBeenSplit = true;
+		e.next().hasBeenSplit = true;
+		e.next().next().hasBeenSplit = true;
+		e.next().next().next().hasBeenSplit = true;
 	}
 	
 	private void smoothPointsOnce()
